@@ -1,0 +1,587 @@
+/* =========================================
+   RESET
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: #f9fafb;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #111827;
+    line-height: 1.5;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* =========================================
+   LAYOUT
+   ========================================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-inline: 1.5rem;
+}
+
+/* =========================================
+   HEADER / NAV
+   ========================================= */
+
+header {
+    padding-block: 1.25rem;
+}
+
+/* wrapper: container nav */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* obal na linky – toto zabezpečí, že linky sú uprostred */
+.nav-left {
+    flex: 1;                           /* zaberá stredový priestor */
+    display: flex;
+    justify-content: center;           /* centrovanie na stred */
+}
+
+/* samotné linky */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.nav-links a {
+    color: #c026d3;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* tlačidlo Prihlásenie – odtlačí sa doprava */
+.btn-primary {
+    margin-left: auto;                 /* šup ho na pravý okraj */
+    background: #c026d3;
+    color: #fff !important;
+    padding: 0.55rem 1.6rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ----- NAV: mobil ----- */
+@media (max-width: 768px) {
+
+    header {
+        padding-block: 0.75rem 0.5rem;
+    }
+
+    .nav {
+        flex-direction: column;
+        align-items: center;          /* centrovanie komplet */
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .nav-left {
+        flex: none;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;          /* centrovanie linkov */
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;          /* centrovanie jednotlivých <li> */
+        text-align: center;           /* centrovanie textu */
+        width: 100%;
+    }
+
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-links a {
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+    }
+
+    .btn-primary {
+        margin-left: 0;
+        margin-top: 0.75rem;
+        align-self: center;           /* centrovanie tlačidla */
+    }
+}
+
+
+/* =========================================
+   HERO (nadpis + vlna)
+   ========================================= */
+
+.hero-blob {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 3.25rem;
+}
+
+/* nadpis pod menu */
+.hero-heading {
+    max-width: 52rem;
+    margin: 0 auto 1.25rem;   /* menšia medzera nad vlnou */
+    padding-inline: 1rem;
+}
+
+.hero-title {
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: #111;
+}
+
+/* box s vlnou – full width */
+.hero-wave-box {
+    position: relative;
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    height: clamp(230px, 32vw, 320px);
+    overflow: hidden;
+}
+
+.hero-wave {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.hero-wave svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* text + tlačidlo vo vlnke – POSUNUTÉ NIŽŠIE */
+.hero-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;                       /* tlačíme smerom dole */
+    gap: 1rem;
+    padding-inline: 1.5rem;
+    padding-bottom: 4.5rem !important;;         /* koľko je text dole */
+    color: #fff;
+    text-align: center;
+}
+
+.hero-sub {
+    font-size: clamp(1rem, 1.4vw, 1.15rem);
+    max-width: 40rem;
+}
+
+.hero-btn {
+    padding: 0.7rem 2.4rem;
+    border-radius: 999px;
+    border: 2px solid #fff;
+    background: transparent;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-size: 0.95rem;
+}
+.hero-btn:hover {
+    background: #fff;
+    color: #9c0b8e;
+}
+
+/* hero – mobil */
+@media (max-width: 768px) {
+
+    .hero-heading {
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 7vw, 2.4rem);
+    }
+
+    .hero-wave-box {
+        height: 280px;
+    }
+
+    .hero-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;         /* drží to pri spodku */
+        gap: 1rem;
+        padding-inline: 1.5rem;
+        padding-bottom: 4.5rem;            /* ZVÝŠENÉ posunutie dole */
+        transform: translateY(45px);       /* EXTRA posun celej skupiny textu nižšie */
+        color: #fff;
+        text-align: center;
+    }
+
+    .hero-sub {
+        font-size: 1rem;
+    }
+
+    .hero-btn {
+        padding: 0.6rem 1.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* =========================================
+   TESTIMONIAL (lekár)
+   ========================================= */
+
+.testimonial-wrapper {
+    margin-top: 3rem;  /* jemné prekrytie vlny */
+    margin-bottom: 3rem;
+}
+
+.testimonial-card {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+    padding: 1.75rem 2rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto; /* šípka – obsah – šípka */
+    align-items: center;
+    column-gap: 1rem;
+}
+
+/* ŠÍPKY – stále na stranách a vertikálne v strede */
+.testimonial-nav-btn {
+    font-size: 2rem;
+    color: #9ca3af;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+
+    align-self: stretch;         /* stĺpec cez celú výšku karty */
+    display: flex;
+    align-items: center;         /* vertikálne centrovanie */
+    justify-content: center;     /* horizontálne centrovanie */
+}
+
+.testimonial-nav-btn:hover {
+    color: #4b5563;
+}
+
+.testimonial-main {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.testimonial-photo img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.testimonial-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.testimonial-name {
+    font-weight: 800;
+    font-size: 1.15rem;
+}
+
+.testimonial-role {
+    font-size: 0.95rem;
+    color: #6b7280;
+}
+
+.testimonial-text {
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    color: #111827;
+}
+
+/* testimonial – mobil */
+@media (max-width: 900px) {
+    .testimonial-wrapper {
+        margin-top: 1.75rem;
+        padding-inline: 0.75rem;
+    }
+
+    .testimonial-card {
+        grid-template-columns: 1fr;
+        row-gap: 1.5rem;
+        padding: 1.5rem 1.25rem;
+    }
+
+    .testimonial-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .testimonial-photo img {
+        width: 72px;
+        height: 72px;
+    }
+
+    .testimonial-meta {
+        width: 100%;
+    }
+
+    .testimonial-text {
+        width: 100%;
+        font-size: 0.95rem;
+    }
+
+    /* na mobile už šípky pekne pod sebou */
+    .testimonial-nav-btn {
+        align-self: center;
+        height: auto;
+    }
+}
+
+/* =========================================
+   INTRO – text pod doktorom
+   ========================================= */
+
+.intro-section {
+    margin: 1rem 0 3rem;
+    text-align: left;
+}
+
+.intro-section h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    color: #111827;
+}
+
+.intro-section p {
+    font-size: 0.98rem;
+    color: #4b5563;
+    max-width: 52rem;
+}
+
+/* mobil */
+@media (max-width: 768px) {
+    .intro-section {
+        padding-inline: 0.75rem;
+        margin-bottom: 2.5rem;
+    }
+}
+
+/* =========================================
+   MAMMOGRAM THUMBS
+   ========================================= */
+
+.thumb-section {
+    margin-bottom: 3rem;
+}
+
+.thumb-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.thumb-card {
+    background: #fff;
+    padding: 0.9rem;
+    border-radius: 1.25rem;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.thumb-card-pink {
+    background: #c026d3;
+    color: #fff;
+}
+
+.thumb-card-softPink {
+    background: #cc8dd5;
+    color: #fff;
+}
+
+.thumb-image {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.thumb-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.thumb-label {
+    margin-top: 0.85rem;
+    font-size: 0.95rem;
+}
+
+/* mobil – jednotné boky */
+@media (max-width: 768px) {
+    .thumb-section {
+        padding-inline: 0.75rem;
+    }
+
+    .thumb-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .thumb-card {
+        padding: 0.85rem;
+    }
+}
+
+/* =========================================
+   ZISTITE VIAC (ČLÁNKY / KARTY)
+   ========================================= */
+
+.more-section {
+    margin: 3.5rem 0 5rem;
+}
+
+.more-section h3 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: #111827;
+}
+
+/* grid – 3 / 2 / 1 stĺpec podľa šírky */
+.more-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+/* karta článku */
+.more-card {
+    background: #fff;
+    padding: 1.6rem 1.5rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-top: 3px solid #e5e7eb;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    max-width: 100%;              /* aby nikdy nepretŕčalo mimo obrazovky */
+}
+
+.more-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(15, 23, 42, 0.10);
+    border-top-color: #c026d3;
+}
+
+.more-tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+}
+
+.more-card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.1rem;
+    color: #111827;
+}
+
+.more-card-text {
+    font-size: 0.95rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    overflow-wrap: anywhere;      /* keď je viewport ultrauzky, láme aj dlhšie slová */
+}
+
+.more-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #c026d3;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.more-card-link span {
+    font-size: 1.1rem;
+    transform: translateY(1px);
+}
+
+/* mobil / vysoký zoom – zmenším fonty a paddingy,
+   aby to nevyzeralo „roztreštene“ na mini šírke */
+@media (max-width: 768px) {
+    .more-section {
+        padding-inline: 0.75rem;
+        margin-bottom: 4rem;
+    }
+
+    .more-section h3 {
+        font-size: 1.5rem;
+    }
+
+    .more-card {
+        padding: 1.3rem 1.1rem;
+    }
+
+    .more-card-title {
+        font-size: 1.1rem;
+    }
+
+    .more-card-text {
+        font-size: 0.9rem;
+    }
+}
+
+/* extra úzka šírka (typicky 200 % zoom na mobile) */
+@media (max-width: 480px) {
+    .more-section h3 {
+        font-size: 1.35rem;
+    }
+
+    .more-card {
+        padding: 1.15rem 1rem;
+        border-radius: 1.1rem;
+    }
+
+    .more-card-text {
+        font-size: 0.88rem;
+    }
+}
