@@ -255,16 +255,23 @@
                 <p class="login-subtitle">Zadajte svoje prihlasovacie údaje</p>
             </div>
 
-            <form id="loginForm">
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+
                 <div class="form-group">
-                    <label class="form-label" for="username">Používateľské meno</label>
+                    <label class="form-label" for="email">Používateľské meno (Email)</label>
                     <input
-                        type="text"
-                        id="username"
-                        class="form-input"
-                        placeholder="Zadajte vaše meno"
+                        type="email"
+                        id="email"
+                        name="email" class="form-input @error('email') is-invalid @enderror"
+                        placeholder="Zadajte váš email"
                         required
+                        autofocus
+                        value="{{ old('email') }}"
                     >
+                    @error('email')
+                    <div style="color: #ef4444; font-size: 14px; margin-top: 5px;">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="form-group">
@@ -272,10 +279,13 @@
                     <input
                         type="password"
                         id="password"
-                        class="form-input"
+                        name="password" class="form-input @error('password') is-invalid @enderror"
                         placeholder="Zadajte vaše heslo"
                         required
                     >
+                    @error('password')
+                    <div style="color: #ef4444; font-size: 14px; margin-top: 5px;">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <button type="submit" class="btn-submit">Prihlásiť sa</button>
