@@ -21,7 +21,7 @@
             <li><a href="#">Kontaktujte nás</a></li>
         </ul>
 
-        <a href="{{ route('login') }}" class="btn-primary">Prihlásenie</a>
+        <a href="/prihlasenie" class="btn-primary">Prihlásenie</a>
     </div>
 </header>
 

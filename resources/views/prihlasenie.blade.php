@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Prihlásenie – Mamography Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         /* ================== RESET ================== */
@@ -284,7 +285,7 @@
             <div class="login-footer">
                 <p class="login-footer-text">
                     Nemáte účet?
-                    <a href="{{ route('register') }}" class="login-footer-link">Zaregistrujte sa</a>
+                    <a href="/registracia" class="login-footer-link">Zaregistrujte sa</a>
                 </p>
             </div>
         </div>

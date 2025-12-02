@@ -6,15 +6,12 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// TÁTO RÚTA ZOBRAZÍ PRIHLÁSENIE:
 Route::get('/prihlasenie', function () {
     return view('prihlasenie');
 })->name('login');
 
-Route::post('/prihlasenie', function () {
-    // Tu by bola logika na prihlásenie
-    return redirect()->route('home');
-})->name('login.submit');
-
+// TÁTO RÚTA ZOBRAZÍ REGISTRÁCIU:
 Route::get('/registracia', function () {
     return view('zaregistrujSa');
 })->name('register');
