@@ -15,7 +15,7 @@
             background: #f9fafb;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #111827;
-            line-height: 1.5;
+            line-height: 1.50;
         }
 
         img {
