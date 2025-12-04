@@ -589,6 +589,7 @@
         // Tu by bola skutočná logika na registráciu
         const accountType = typeDoktor.checked ? 'Doktor' : 'Pacient';
         alert('Registrácia prebieha...\nTyp účtu: ' + accountType);
+        window.location.href = '/prihlasenie';
     });
 </script>
 

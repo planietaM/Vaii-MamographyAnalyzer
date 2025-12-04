@@ -1,0 +1,28 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class AdminUserSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Kontrola, či admin už neexistuje, aby sme ho nevytvárali opakovane
+        if (User::where('email', 'admin@mamography.sk')->doesntExist()) {
+            User::create([
+                'name' => 'Admin',
+                'surname' => 'System',
+                'email' => 'admin@mamography.sk',
+                'password' => Hash::make('SuperTajneHeslo123'), // <--- ZMENIŤ NA BEZPEČNÉ HESLO!
+                'role' => 'admin', // <--- Dôležitá rola
+                'email_verified_at' => now(),
+            ]);
+        }
+    }
+}

@@ -258,12 +258,11 @@
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label class="form-label" for="username">Používateľské meno</label>
+                    <label class="form-label" for="email">Emailová adresa</label>
                     <input
-                        type="text"
-                        id="username"
-                        class="form-input"
-                        placeholder="Zadajte vaše meno"
+                        type="email"
+                        id="email"               class="form-input"
+                        placeholder="Zadajte vašu emailovú adresu"
                         required
                     >
                 </div>
@@ -293,15 +292,53 @@
 </main>
 
 <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    // Nastavte správnu URL k tvojmu Laravel Back-endu
+    const API_URL = 'http://127.0.0.1:8000/api';
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const username = document.getElementById('username').value;
+        // 1. Získanie hodnôt
+        const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        if (username && password) {
-            alert('Prihlásenie prebieha...\nMeno: ' + username);
-            // Tu by bola skutočná logika na prihlásenie
+        try {
+            // 2. Volanie Laravel API s Axios na /api/login
+            const response = await axios.post(`${API_URL}/login`, {
+                email: email,
+                password: password,
+            });
+
+            // Ak je úspech (Status 200 OK):
+            const { access_token, user } = response.data;
+
+            // 3. Uloženie tokenu a user dát do prehliadača (localStorage)
+            localStorage.setItem('userToken', access_token);
+            localStorage.setItem('user', JSON.stringify(user));
+
+            console.log('Prihlásenie úspešné. Token uložený pre: ' + user.email);
+
+            // 4. Presmerovanie na chránený dashboard
+            window.location.href = '/dashboard';
+
+        } catch (error) {
+            console.error('Chyba pri prihlásení:', error);
+
+            let errorMessage = 'Nastala chyba pri komunikácii so serverom.';
+
+            if (error.response) {
+                // Spracovanie chýb z Back-endu (napr. 401 Unauthorized)
+                if (error.response.status === 401) {
+                    errorMessage = 'Nesprávny email alebo heslo.';
+                } else if (error.response.data && error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response.data.errors && error.response.data.errors.email) {
+                    // Ak nastane chyba validácie (napr. rate limit)
+                    errorMessage = error.response.data.errors.email[0];
+                }
+            }
+
+            alert(errorMessage);
         }
     });
 </script>
