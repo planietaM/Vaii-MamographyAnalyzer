@@ -18,7 +18,7 @@
             <li><a href="#">Pacienti</a></li>
             <li><a href="#">O nás</a></li>
             <li><a href="#">Partneri</a></li>
-            <li><a href="#">Kontaktujte nás</a></li>
+            <li><a href="{{ route('users.list') }}">Kontaktujte nás</a></li>
         </ul>
 
         <a href="/prihlasenie" class="btn-primary">Prihlásenie</a>

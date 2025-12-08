@@ -21,7 +21,6 @@ class RegistrationTest extends TestCase
             'is_doctor' => false, // Váš Front-end posiela toto!
             'rodne_cislo' => '123456/7890',
             'datum_narodenia' => '1990-01-01',
-            'pohlavie' => 'muz',
         ];
 
         // ✅ Oprava Routy: Voláme /api/register

@@ -21,7 +21,19 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        // Added fields used during registration
+        'surname',
+        'role',
+        'phone',
+        'dikter_id',
+        'specialization',
+        'workplace',
+        'national_id',
+        'birth_date',
     ];
+
+    // Allow mass assignment for remaining custom fields (silence static analyzer warnings)
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -34,15 +46,12 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string,string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 }

@@ -36,7 +36,16 @@
 
         /* HEADER */
         header {
-            padding-block: 1.25rem;
+            margin-top: 0.6rem; /* small gap above the purple header */
+            padding-block: 0.5rem 1rem;
+            /* make header match the purple welcome hero */
+            background: linear-gradient(135deg, #9c0b8e 0%, #d04fa7 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
         }
 
         .nav {
@@ -44,6 +53,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100%;
         }
 
         .nav-left {
@@ -58,7 +68,7 @@
         }
 
         .nav-links a {
-            color: #c026d3;
+            color: #fff; /* links in header should be white on purple */
             font-size: 0.95rem;
             font-weight: 500;
         }
@@ -70,23 +80,27 @@
         .btn-primary {
             position: absolute;
             right: clamp(1.5rem, 4vw, 3rem);
-            top: 50%;
-            transform: translateY(-50%);
-            background: #c026d3;
-            color: #fff !important;
+            top: 1.6rem;
+            transform: none;
+            /* white button with purple text */
+            background: #ffffff;
+            color: #9c0b8e !important; /* purple text */
             padding: 0.55rem 1.6rem;
             border-radius: 999px;
             font-size: 0.95rem;
             font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
+            border: 2px solid rgba(0,0,0,0.05);
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
         .btn-primary:hover {
-            background: #a21caf;
-            transform: translateY(-50%) scale(1.05);
+            background: #fff;
+            color: #7a0a6f !important;
+            transform: scale(1.02);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
         }
 
         /* Welcome Hero */
@@ -109,6 +123,31 @@
 
         .welcome-subtitle {
             font-size: clamp(1rem, 1.5vw, 1.15rem);
+            opacity: 0.95;
+        }
+
+        /* Header-centered title (fallback) */
+        .header-center {
+            text-align: center;
+            padding: 0.5rem 0 1rem 0;
+            color: #fff;
+            position: relative;
+            z-index: 50; /* ensure it sits above other elements */
+            text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.02em;
+        }
+
+        .header-subtitle {
+            margin: 0.35rem 0 0 0;
+            color: rgba(255,255,255,0.95);
+            font-size: 1rem;
             opacity: 0.95;
         }
 
@@ -433,36 +472,59 @@
             }
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
 
 <header>
     <div class="container nav">
-        <div class="nav-left">
-            <ul class="nav-links">
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Doktori</a></li>
-                <li><a href="#">Pacienti</a></li>
-                <li><a href="#">Štatistiky</a></li>
-                <li><a href="#">Nastavenia</a></li>
-            </ul>
-        </div>
+
 
         <button class="btn-primary" onclick="handleLogout()">Odhlásiť sa</button>
     </div>
 </header>
 
+<!-- Welcome hero (title + subtitle) -->
 <section class="welcome-hero">
     <div class="container">
         <div class="welcome-content">
             <h1 class="welcome-title">Admin Dashboard</h1>
-            <p class="welcome-subtitle">
-                Správa doktorov, pacientov a systému
-            </p>
+            <p class="welcome-subtitle">Správa doktorov, pacientov a systému</p>
         </div>
     </div>
 </section>
+
+<!-- User modal -->
+<div id="userModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; padding:1.25rem; border-radius:8px; width:520px; max-width:95%;">
+        <h3 id="modalTitle">Uprav používateľa</h3>
+        <form id="userForm">
+            <input type="hidden" name="id" id="userId" />
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                <input placeholder="Meno" name="name" id="userName" style="flex:1; padding:8px;" />
+                <input placeholder="Priezvisko" name="surname" id="userSurname" style="flex:1; padding:8px;" />
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                <input placeholder="Email" name="email" id="userEmail" style="flex:1; padding:8px;" />
+                <input placeholder="Telefón" name="phone" id="userPhone" style="flex:1; padding:8px;" />
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                <select id="userRole" name="role" style="padding:8px;">
+                    <option value="patient">Pacient</option>
+                    <option value="doctor">Doktor</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <input placeholder="Dikter ID" name="dikter_id" id="userDikter" style="flex:1; padding:8px;" />
+            </div>
+
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button type="button" onclick="closeUserModal()" style="padding:8px 12px;">Zrušiť</button>
+                <button id="saveUserBtn" type="button" onclick="saveUser()" style="background:#9c0b8e;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Uložiť</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div class="container">
     <section class="admin-dashboard">
@@ -471,7 +533,7 @@
             <div class="stat-card">
                 <div class="stat-icon">👨‍⚕️</div>
                 <div class="stat-info">
-                    <div class="stat-number">12</div>
+                    <div class="stat-number">{{ $doctorsCount ?? 0 }}</div>
                     <div class="stat-label">Celkovo doktorov</div>
                 </div>
             </div>
@@ -479,7 +541,7 @@
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
                 <div class="stat-info">
-                    <div class="stat-number">284</div>
+                    <div class="stat-number">{{ $patientsCount ?? 0 }}</div>
                     <div class="stat-label">Celkovo pacientov</div>
                 </div>
             </div>
@@ -487,7 +549,7 @@
             <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div class="stat-info">
-                    <div class="stat-number">1,247</div>
+                    <div class="stat-number">{{ $analysesCount ?? 0 }}</div>
                     <div class="stat-label">Vykonaných analýz</div>
                 </div>
             </div>
@@ -495,7 +557,7 @@
             <div class="stat-card">
                 <div class="stat-icon">✅</div>
                 <div class="stat-info">
-                    <div class="stat-number">23</div>
+                    <div class="stat-number">{{ $todayCount ?? 0 }}</div>
                     <div class="stat-label">Dnes vykonaných</div>
                 </div>
             </div>
@@ -504,10 +566,6 @@
         <div class="section">
             <div class="section-header">
                 <h2 class="section-title">Doktori</h2>
-                <button class="btn-add">
-                    <span>➕</span>
-                    <span>Pridať doktora</span>
-                </button>
             </div>
 
             <div class="table-container">
@@ -519,122 +577,35 @@
                             <th>Špecializácia</th>
                             <th>Email</th>
                             <th>Telefón</th>
-                            <th>Pacientov</th>
-                            <th>Stav</th>
-                            <th>Akcie</th>
+                            <th>Zobraziť</th>
+                            <th>Upraviť</th>
+                            <th>Vymazať</th>
                         </tr>
                         </thead>
                         <tbody>
+                        @forelse($doctors ?? collect() as $doc)
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar">DN</div>
+                                    <div class="user-avatar">{{ strtoupper(substr($doc->name,0,1) . substr($doc->surname ?? '',0,1)) }}</div>
                                     <div class="user-details">
-                                        <h4>Dr. Jana Nováková</h4>
-                                        <p>ID: DOC001</p>
+                                        <h4>Dr. {{ $doc->name }} {{ $doc->surname }}</h4>
+                                        <p>ID: {{ $doc->dikter_id ?? '-' }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td>Rádiológia</td>
-                            <td>jana.novakova@clinic.sk</td>
-                            <td>+421 912 345 678</td>
-                            <td>47</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
+                            <td>{{ $doc->specialization ?? '-' }}</td>
+                            <td>{{ $doc->email }}</td>
+                            <td>{{ $doc->phone ?? '-' }}</td>
+                            <td><button class="btn-action btn-view" onclick="viewUser({{ $doc->id }})">Zobraziť</button></td>
+                            <td><button class="btn-action btn-edit" onclick="openUserModal({{ json_encode($doc) }})">Upraviť</button></td>
+                            <td><button class="btn-action btn-delete" onclick="deleteUser({{ $doc->id }})">Vymazať</button></td>
                         </tr>
+                        @empty
                         <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">PH</div>
-                                    <div class="user-details">
-                                        <h4>Dr. Peter Horváth</h4>
-                                        <p>ID: DOC002</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Rádiológia</td>
-                            <td>peter.horvath@clinic.sk</td>
-                            <td>+421 903 456 789</td>
-                            <td>52</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
+                            <td colspan="7">Žiadni doktori.</td>
                         </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">EK</div>
-                                    <div class="user-details">
-                                        <h4>Dr. Eva Kováčová</h4>
-                                        <p>ID: DOC003</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Onkológia</td>
-                            <td>eva.kovacova@clinic.sk</td>
-                            <td>+421 905 567 890</td>
-                            <td>38</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">MS</div>
-                                    <div class="user-details">
-                                        <h4>Dr. Mária Szabová</h4>
-                                        <p>ID: DOC004</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Rádiológia</td>
-                            <td>maria.szabova@clinic.sk</td>
-                            <td>+421 917 678 901</td>
-                            <td>41</td>
-                            <td><span class="status-badge status-inactive">Neaktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">JV</div>
-                                    <div class="user-details">
-                                        <h4>Dr. Ján Varga</h4>
-                                        <p>ID: DOC005</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Chirurgia</td>
-                            <td>jan.varga@clinic.sk</td>
-                            <td>+421 908 789 012</td>
-                            <td>35</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
-                        </tr>
+                        @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -644,10 +615,6 @@
         <div class="section">
             <div class="section-header">
                 <h2 class="section-title">Pacienti</h2>
-                <button class="btn-add">
-                    <span>➕</span>
-                    <span>Pridať pacienta</span>
-                </button>
             </div>
 
             <div class="table-container">
@@ -656,154 +623,40 @@
                         <thead>
                         <tr>
                             <th>Pacient</th>
-                            <th>Vek</th>
+                            <th>Meno</th>
+                            <td>Priezvisko</td>
                             <th>Email</th>
                             <th>Telefón</th>
-                            <th>Ošetrujúci lekár</th>
                             <th>Posledné vyšetrenie</th>
-                            <th>Stav</th>
-                            <th>Akcie</th>
+                            <th>Zobraziť</th>
+                            <th>Upraviť</th>
+                            <th>Vymazať</th>
                         </tr>
                         </thead>
                         <tbody>
+                        @forelse($patients ?? collect() as $p)
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar">AM</div>
+                                    <div class="user-avatar">{{ strtoupper(substr($p->name,0,1) . substr($p->surname ?? '',0,1)) }}</div>
                                     <div class="user-details">
-                                        <h4>Anna Malá</h4>
-                                        <p>ID: PAT2850</p>
                                     </div>
                                 </div>
                             </td>
-                            <td>54 rokov</td>
-                            <td>anna.mala@email.sk</td>
-                            <td>+421 911 234 567</td>
-                            <td>Dr. Nováková</td>
-                            <td>02.12.2024</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
+                            <td>{{ $p->name }}</td>
+                            <td>{{ $p->surname }}</td>
+                            <td>{{ $p->birth_date ? \Carbon\Carbon::parse($p->birth_date)->age . ' rokov' : '-' }}</td>
+                            <td>{{ $p->phone ?? '-' }}</td>
+                            <td>{{ $p->last_exam_date ?? '-' }}</td>
+                            <td><button class="btn-action btn-view" onclick="viewUser({{ $p->id }})">Zobraziť</button></td>
+                            <td><button class="btn-action btn-edit" onclick="openUserModal({{ json_encode($p) }})">Upraviť</button></td>
+                            <td><button class="btn-action btn-delete" onclick="deleteUser({{ $p->id }})">Vymazať</button></td>
                         </tr>
+                        @empty
                         <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">PV</div>
-                                    <div class="user-details">
-                                        <h4>Petra Varga</h4>
-                                        <p>ID: PAT2849</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>58 rokov</td>
-                            <td>petra.varga@email.sk</td>
-                            <td>+421 902 345 678</td>
-                            <td>Dr. Nováková</td>
-                            <td>02.12.2024</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
+                            <td colspan="8">Žiadni pacienti.</td>
                         </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">MH</div>
-                                    <div class="user-details">
-                                        <h4>Mária Horváthová</h4>
-                                        <p>ID: PAT2848</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>52 rokov</td>
-                            <td>maria.horvath@email.sk</td>
-                            <td>+421 904 456 789</td>
-                            <td>Dr. Horváth</td>
-                            <td>01.12.2024</td>
-                            <td><span class="status-badge status-pending">Kontrola</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">JK</div>
-                                    <div class="user-details">
-                                        <h4>Jana Kováčová</h4>
-                                        <p>ID: PAT2847</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>48 rokov</td>
-                            <td>jana.kovac@email.sk</td>
-                            <td>+421 906 567 890</td>
-                            <td>Dr. Kováčová</td>
-                            <td>01.12.2024</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">ES</div>
-                                    <div class="user-details">
-                                        <h4>Eva Szabová</h4>
-                                        <p>ID: PAT2846</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>61 rokov</td>
-                            <td>eva.szabo@email.sk</td>
-                            <td>+421 918 678 901</td>
-                            <td>Dr. Nováková</td>
-                            <td>30.11.2024</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">LD</div>
-                                    <div class="user-details">
-                                        <h4>Lucia Dvořáková</h4>
-                                        <p>ID: PAT2845</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>45 rokov</td>
-                            <td>lucia.dvorak@email.sk</td>
-                            <td>+421 909 789 012</td>
-                            <td>Dr. Varga</td>
-                            <td>30.11.2024</td>
-                            <td><span class="status-badge status-active">Aktívny</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="btn-action btn-view">Zobraziť</button>
-                                    <button class="btn-action btn-edit">Upraviť</button>
-                                </div>
-                            </td>
-                        </tr>
+                        @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -815,33 +668,110 @@
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-    // URL k vášmu API
-    const API_URL = 'http://127.0.0.1:8000/api';
+    // Base API URL for requests
+    const API_URL = '{{ url('/') }}';
 
+    // Configure axios default headers
+    // Set CSRF token for axios
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    if (csrfMeta) {
+        axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfMeta.getAttribute('content');
+    }
+    axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+    async function viewUser(id) {
+        try {
+            const res = await axios.get(`/admin/users/${id}`);
+            openUserModal(res.data, 'view');
+        } catch (err) {
+            alert('Chyba pri načítaní používateľa');
+            console.error(err);
+        }
+    }
+
+    function openUserModal(user, mode = 'edit') {
+        document.getElementById('userId').value = user.id;
+        document.getElementById('userName').value = user.name || '';
+        document.getElementById('userSurname').value = user.surname || '';
+        document.getElementById('userEmail').value = user.email || '';
+        document.getElementById('userPhone').value = user.phone || '';
+
+        const saveBtn = document.getElementById('saveUserBtn');
+        if (mode === 'view') {
+            document.getElementById('modalTitle').innerText = 'Zobraziť používateľa';
+            ['userName','userSurname','userEmail','userPhone',].forEach(id => {
+                document.getElementById(id).setAttribute('disabled','disabled');
+            });
+            if (saveBtn) saveBtn.style.display = 'none';
+        } else {
+            document.getElementById('modalTitle').innerText = 'Uprav používateľa';
+            ['userName','userSurname','userEmail','userPhone',].forEach(id => {
+                document.getElementById(id).removeAttribute('disabled');
+            });
+            if (saveBtn) saveBtn.style.display = 'inline-block';
+        }
+        document.getElementById('userModal').style.display = 'flex';
+     }
+
+    function closeUserModal() {
+        document.getElementById('userModal').style.display = 'none';
+        // ensure fields are enabled again
+        ['userName','userSurname','userEmail','userPhone'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.removeAttribute('disabled');
+        });
+     }
+
+    async function saveUser() {
+        const id = document.getElementById('userId').value;
+        const payload = {
+            name: document.getElementById('userName').value,
+            surname: document.getElementById('userSurname').value,
+            email: document.getElementById('userEmail').value,
+            phone: document.getElementById('userPhone').value,
+
+        };
+
+        try {
+            const res = await axios.put(`/admin/users/${id}`, payload);
+            alert('Uložené');
+            closeUserModal();
+            // optionally refresh page to show updated data
+            window.location.reload();
+        } catch (err) {
+            alert('Chyba pri uložení');
+            console.error(err);
+        }
+    }
+
+    async function deleteUser(id) {
+        if (!confirm('Naozaj chcete používateľa vymazať?')) return;
+        try {
+            await axios.delete(`/admin/users/${id}`);
+            alert('Používateľ vymazaný');
+            window.location.reload();
+        } catch (err) {
+            alert('Chyba pri mazani');
+            console.error(err);
+        }
+    }
+
+    // helper called by logout button
     function handleLogout() {
         const token = localStorage.getItem('userToken');
 
         if (!token) {
-            // Ak token neexistuje, presmeruj hneď
             window.location.href = '/prihlasenie';
             return;
         }
 
-        // Volanie /api/logout s tokenom v hlavičke
         axios.post(`${API_URL}/logout`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .finally(() => {
-                // Zmazanie tokenu a presmerovanie, bez ohľadu na odpoveď servera
-                localStorage.removeItem('userToken');
-                localStorage.removeItem('user');
-
-                // Jednoduchá notifikácia (môžete ju zmeniť za krajší UI prvok)
-                alert('Boli ste úspešne odhlásený.');
-                window.location.href = '/prihlasenie';
-            });
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).finally(() => {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            window.location.href = '/prihlasenie';
+        });
     }
 </script>
 

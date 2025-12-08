@@ -482,15 +482,6 @@
                             >
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="pohlavie">Pohlavie *</label>
-                        <select id="pohlavie" name="pohlavie" class="form-input">
-                            <option value="">Vyberte pohlavie</option>
-                            <option value="zena">Žena</option>
-                            <option value="muz">Muž</option>
-                        </select>
-                    </div>
                 </div>
 
                 {{-- Heslo --}}
@@ -551,7 +542,6 @@
             // Nie required pre pacienta
             document.getElementById('rodne_cislo').required = false;
             document.getElementById('datum_narodenia').required = false;
-            document.getElementById('pohlavie').required = false;
         } else {
             doktorFields.style.display = 'none';
             pacientFields.style.display = 'block';
@@ -559,7 +549,6 @@
             // Required pre pacienta
             document.getElementById('rodne_cislo').required = true;
             document.getElementById('datum_narodenia').required = true;
-            document.getElementById('pohlavie').required = true;
 
             // Nie required pre doktora
             document.getElementById('dikter_id').required = false;
@@ -570,7 +559,7 @@
     typePacient.addEventListener('change', toggleAccountType);
 
     // Validácia formulára
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const password = document.getElementById('password').value;
@@ -586,11 +575,82 @@
             return;
         }
 
-        // Tu by bola skutočná logika na registráciu
-        const accountType = typeDoktor.checked ? 'Doktor' : 'Pacient';
-        alert('Registrácia prebieha...\nTyp účtu: ' + accountType);
-        window.location.href = '/prihlasenie';
+        // Build payload matching backend expectations
+        const isDoctor = typeDoktor.checked;
+        const payload = {
+            name: (document.getElementById('meno').value || '') + ' ' + (document.getElementById('priezvisko').value || ''),
+            email: document.getElementById('email').value,
+            password: password,
+            password_confirmation: passwordConfirm,
+            is_doctor: isDoctor,
+            telefon: document.getElementById('telefon').value || null,
+        };
+
+        if (isDoctor) {
+            payload.dikter_id = document.getElementById('dikter_id').value || null;
+            payload.specializacia = document.getElementById('specializacia').value || null;
+            payload.pracovisko = document.getElementById('pracovisko').value || null;
+        } else {
+            payload.rodne_cislo = document.getElementById('rodne_cislo').value || null;
+            payload.datum_narodenia = document.getElementById('datum_narodenia').value || null;
+        }
+
+        try {
+            // Log payload for debugging
+            console.log('Registration payload:', payload);
+
+            // Send POST to API route using axios if available, otherwise fetch as fallback
+            let response;
+            if (window.axios) {
+                response = await axios.post('/api/register', payload, { headers: { 'Content-Type': 'application/json' } });
+            } else {
+                // fallback using fetch
+                response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    credentials: 'same-origin'
+                });
+            }
+
+            // Normalize response for fetch/axios
+            let status = response.status || (response.status === undefined ? (response && response.status) : null);
+            let data;
+            if (window.axios) {
+                status = response.status;
+                data = response.data;
+            } else {
+                status = response.status;
+                data = await response.json().catch(() => ({}));
+            }
+
+            console.log('Registration response status:', status); console.log('Registration response data:', data);
+
+            if (status === 201) {
+                alert('Registrácia prebehla úspešne. Prosím prihláste sa.');
+                window.location.href = '/prihlasenie';
+            } else if (status === 422) {
+                const errors = data.errors || data;
+                let messages = [];
+                for (const key in errors) {
+                    if (Array.isArray(errors[key])) messages = messages.concat(errors[key]);
+                    else if (typeof errors[key] === 'string') messages.push(errors[key]);
+                }
+                alert('Chyby pri registrácii:\n' + messages.join('\n'));
+            } else {
+                alert('Registrácia zlyhala. Server vrátil ' + status + '. Skontrolujte konzolu pre detaily.');
+            }
+        } catch (err) {
+            console.error('Registration error:', err);
+            if (err.response && err.response.data) {
+                const errors = err.response.data.errors || err.response.data;
+                alert('Chyba pri registrácii:\n' + JSON.stringify(errors));
+            } else {
+                alert('Chyba: ' + (err.message || JSON.stringify(err)));
+            }
+        }
     });
+
 </script>
 
 </body>
