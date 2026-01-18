@@ -433,160 +433,150 @@
         }
     </style>
 </head>
-
 <body>
 
 <header>
     <div class="container nav">
-        <div class="nav-left">
-            <ul class="nav-links">
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Pacienti</a></li>
-                <li><a href="#">Vyšetrenia</a></li>
-                <li><a href="#">Štatistiky</a></li>
-                <li><a href="#">Nastavenia</a></li>
-            </ul>
-        </div>
-
-        <button class="btn-primary">Odhlásiť sa</button>
+        <button class="btn-primary" onclick="handleLogout()">Odhlásiť sa</button>
     </div>
 </header>
 
-<section class="welcome-hero">
-    <div class="container">
-        <div class="welcome-content">
-            <h1 class="welcome-title">Vitajte, Dr. Nováková</h1>
-            <p class="welcome-subtitle">
-                Prehľad vašich pacientov a čakajúcich vyšetrení
-            </p>
-        </div>
-    </div>
-</section>
-
-<div class="container">
+<main class="container">
     <section class="doctor-dashboard">
-
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-info">
-                    <div class="stat-number">47</div>
-                    <div class="stat-label">Aktívni pacienti</div>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-info">
-                    <div class="stat-number">8</div>
-                    <div class="stat-label">Dnes dokončené</div>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-info">
-                    <div class="stat-number">156</div>
-                    <div class="stat-label">Celkovo analýz</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="actions-section">
-            <h2 class="section-title">Nová analýza</h2>
-
-            <div class="action-grid" style="grid-template-columns: 1fr; max-width: 500px; margin: 0 auto;">
-                <div class="action-card action-primary">
-                    <div class="action-icon">🔬</div>
-                    <h3 class="action-title">Analyzovať mamografické snímky</h3>
-                    <p class="action-desc">Nahrať a analyzovať nové mamografické snímky pomocou AI</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Analyses -->
-        <div class="pending-section">
-            <h2 class="section-title">Posledné analýzy</h2>
-
-            <div class="case-list">
-                <div class="case-item">
-                    <div class="case-priority priority-normal"></div>
-                    <div class="case-info">
-                        <h4>Anna Malá (ID: 2850)</h4>
-                        <p class="case-details">Mamografia - Preventívna prehliadka • Vek: 54 rokov • Výsledok: Negatívny</p>
-                    </div>
-                    <div class="case-date">02.12.2024</div>
-                    <div class="case-action">
-                        <button class="btn-view">Zobraziť</button>
-                    </div>
-                </div>
-
-                <div class="case-item">
-                    <div class="case-priority priority-normal"></div>
-                    <div class="case-info">
-                        <h4>Petra Varga (ID: 2849)</h4>
-                        <p class="case-details">Mamografia - Ročná kontrola • Vek: 58 rokov • Výsledok: Negatívny</p>
-                    </div>
-                    <div class="case-date">02.12.2024</div>
-                    <div class="case-action">
-                        <button class="btn-view">Zobraziť</button>
-                    </div>
-                </div>
-
-                <div class="case-item">
-                    <div class="case-priority priority-medium"></div>
-                    <div class="case-info">
-                        <h4>Mária Horváthová (ID: 2848)</h4>
-                        <p class="case-details">Mamografia - Kontrolné vyšetrenie • Vek: 52 rokov • Výsledok: Vyžaduje pozornosť</p>
-                    </div>
-                    <div class="case-date">01.12.2024</div>
-                    <div class="case-action">
-                        <button class="btn-view">Zobraziť</button>
-                    </div>
-                </div>
-
-                <div class="case-item">
-                    <div class="case-priority priority-normal"></div>
-                    <div class="case-info">
-                        <h4>Jana Kováčová (ID: 2847)</h4>
-                        <p class="case-details">Mamografia - Skríning • Vek: 48 rokov • Výsledok: Negatívny</p>
-                    </div>
-                    <div class="case-date">01.12.2024</div>
-                    <div class="case-action">
-                        <button class="btn-view">Zobraziť</button>
-                    </div>
-                </div>
-
-                <div class="case-item">
-                    <div class="case-priority priority-normal"></div>
-                    <div class="case-info">
-                        <h4>Eva Szabová (ID: 2846)</h4>
-                        <p class="case-details">Mamografia - Preventívna prehliadka • Vek: 61 rokov • Výsledok: Negatívny</p>
-                    </div>
-                    <div class="case-date">30.11.2024</div>
-                    <div class="case-action">
-                        <button class="btn-view">Zobraziť</button>
-                    </div>
-                </div>
-
-                <div class="case-item">
-                    <div class="case-priority priority-normal"></div>
-                    <div class="case-info">
-                        <h4>Lucia Dvořáková (ID: 2845)</h4>
-                        <p class="case-details">Mamografia - Ročná kontrola • Vek: 45 rokov • Výsledok: Negatívny</p>
-                    </div>
-                    <div class="case-date">30.11.2024</div>
-                    <div class="case-action">
-                        <button class="btn-view">Zobraziť</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <h2 class="section-title">Moje vyšetrenia</h2>
+        <div id="doctorExamsList">Načítavam...</div>
+        <button onclick="openExamModalForPatientPrompt()" style="margin-top:12px;">Nahrať nové vyšetrenie pre pacienta</button>
     </section>
-</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const API_URL = "{{ url('/api') }}";
+    if (typeof axios !== 'undefined') {
+        axios.defaults.baseURL = API_URL;
+        axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+        axios.defaults.headers.common['Accept'] = 'application/json';
+    }
+
+    function handleLogout() {
+        const token = localStorage.getItem('userToken');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        axios.post('/logout', {}, { headers })
+            .catch(() => {})
+            .finally(() => {
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('user');
+                window.location.href = '/prihlasenie';
+            });
+    }
+
+    async function loadDoctorExams() {
+        try {
+            // need to know doctor id — when logged in, backend can return it from /api/user
+            const meResp = await axios.get('/user');
+            const me = meResp.data;
+            const res = await axios.get(`/doctors/${me.id}/examinations`);
+            const exams = res.data;
+            const container = document.getElementById('doctorExamsList');
+            if (!exams || exams.length === 0) { container.innerText = 'Žiadne vyšetrenia.'; return; }
+            container.innerHTML = exams.map(e => `<div style="padding:8px;border:1px solid #eee;margin-bottom:6px;">
+                <strong>Pacient:</strong> ${e.patient_id} <br/>
+                <strong>Výsledok:</strong> ${e.result} <br/>
+                <button onclick="openExamEditor(${e.id})">Upraviť</button>
+            </div>`).join('');
+        } catch (err) {
+            console.error(err);
+            document.getElementById('doctorExamsList').innerText = 'Chyba pri načítaní.';
+        }
+    }
+
+    function openExamModalForPatientPrompt() {
+        const patientId = prompt('ID pacienta:');
+        if (!patientId) return;
+        // create a file input dynamically to prompt for an image
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (ev) => {
+            const file = ev.target.files[0];
+            if (!file) return;
+            const result = prompt('Výsledok (positive/negative):', 'negative');
+            if (!result) return;
+            const fd = new FormData();
+            fd.append('patient_id', patientId);
+            fd.append('photo', file);
+            fd.append('result', result);
+
+            try {
+                // use token from localStorage if present, otherwise rely on cookie auth
+                const token = localStorage.getItem('userToken');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const res = await axios.post('/examinations', fd, { headers });
+                alert('Vyšetrenie úspešne uložené');
+                loadDoctorExams();
+            } catch (err) {
+                console.error('Upload error', err);
+                alert('Chyba pri nahrávaní vyšetrenia');
+            }
+        };
+        // trigger file picker
+        input.click();
+    }
+
+    function openExamEditor(examId) {
+        (async function () {
+            try {
+                const res = await axios.get(`/examinations/${examId}`);
+                const exam = res.data;
+                const newResult = prompt('Nový výsledok (positive/negative):', exam.result || 'negative');
+                if (newResult === null) return;
+
+                const changePhoto = confirm('Chcete zmeniť fotku?');
+                let fd = null;
+                if (changePhoto) {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = async (ev) => {
+                        const file = ev.target.files[0];
+                        if (!file) return;
+                        fd = new FormData();
+                        fd.append('result', newResult);
+                        fd.append('photo', file);
+                        try {
+                            const token = localStorage.getItem('userToken');
+                            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                            await axios.put(`/examinations/${examId}`, fd, { headers });
+                            alert('Vyšetrenie aktualizované');
+                            loadDoctorExams();
+                        } catch (err) {
+                            console.error(err);
+                            alert('Chyba pri aktualizácii');
+                        }
+                    };
+                    input.click();
+                } else {
+                    // just update result via JSON request
+                    try {
+                        const token = localStorage.getItem('userToken');
+                        const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+                        await axios.put(`/examinations/${examId}`, { result: newResult }, { headers });
+                        alert('Vyšetrenie aktualizované');
+                        loadDoctorExams();
+                    } catch (err) {
+                        console.error(err);
+                        alert('Chyba pri aktualizácii');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Chyba pri načítaní vyšetrenia');
+            }
+        })();
+    }
+
+    loadDoctorExams();
+</script>
 
 </body>
 </html>

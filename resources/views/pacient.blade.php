@@ -87,7 +87,24 @@
             background: linear-gradient(135deg, #9c0b8e 0%, #d04fa7 100%);
             padding: 3rem 0;
             margin-bottom: 3rem;
+            position: relative; /* allow absolute children */
         }
+
+        /* Logout button placed inside welcome hero */
+        .hero-logout {
+            position: absolute;
+            right: clamp(1.5rem, 4vw, 3rem);
+            top: 1.25rem;
+            background: #fff;
+            color: #9c0b8e;
+            border: 2px solid rgba(255,255,255,0.08);
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+        .hero-logout:hover { transform: translateY(-2px); }
 
         .welcome-content {
             text-align: center;
@@ -300,6 +317,14 @@
                 align-self: flex-start;
             }
 
+            /* Make hero logout flow naturally on mobile (no absolute overlap) */
+            .hero-logout {
+                position: static;
+                margin: 0.5rem 0 0 auto;
+                display: inline-block;
+                transform: none;
+            }
+
             .welcome-hero {
                 padding: 2rem 0;
                 margin-bottom: 2rem;
@@ -336,29 +361,25 @@
 <header>
     <div class="container nav">
         <div class="nav-left">
-            <ul class="nav-links">
-                <li><a href="#">Skríning rakoviny</a></li>
-                <li><a href="#">Pacienti</a></li>
-                <li><a href="#">O nás</a></li>
-                <li><a href="#">Partneri</a></li>
-                <li><a href="#">Kontaktujte nás</a></li>
-            </ul>
+            <!-- Navigation hidden for patient; only logout button shown as requested -->
         </div>
 
-        <a href="#" class="btn-primary">Odhlásiť sa</a>
-    </div>
-</header>
+        <!-- logout moved into welcome hero for better visual placement -->
+     </div>
+ </header>
 
-<section class="welcome-hero">
-    <div class="container">
+ <section class="welcome-hero">
+     <div class="container">
         <div class="welcome-content">
-            <h1 class="welcome-title">Vitajte, pacient</h1>
+            <h1 class="welcome-title">Vitajte, <span id="welcomeName">pacient</span></h1>
             <p class="welcome-subtitle">
                 Tu nájdete prístup k vašim vyšetreniam a zdravotným záznamom
             </p>
         </div>
-    </div>
-</section>
+        <!-- Logout button inside the purple hero, visually aligned to top-right -->
+        <button id="logoutBtn" class="hero-logout">Odhlásiť sa</button>
+     </div>
+ </section>
 
 <div class="container">
     <section class="patient-dashboard">
@@ -399,6 +420,169 @@
 
     </section>
 </div>
+
+<!-- Image preview modal -->
+<div id="imageModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;z-index:10000;">
+    <div style="position:relative;max-width:90%;max-height:90%;">
+        <button id="imageModalClose" style="position:absolute;right:-10px;top:-10px;background:#fff;border-radius:50%;width:36px;height:36px;border:none;cursor:pointer;font-weight:700;">✕</button>
+        <img id="imageModalImg" src="" alt="Prehliadanie vyšetrenia" style="display:block;max-width:100%;max-height:90vh;border-radius:8px;" />
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // modal helpers
+    function showImageModal(url) {
+        const modal = document.getElementById('imageModal');
+        const img = document.getElementById('imageModalImg');
+        if (!modal || !img) return;
+        img.src = url;
+        modal.style.display = 'flex';
+    }
+    function closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        const img = document.getElementById('imageModalImg');
+        if (!modal || !img) return;
+        modal.style.display = 'none';
+        img.src = '';
+    }
+    document.addEventListener('click', function (ev) {
+        if (ev.target && ev.target.id === 'imageModalClose') {
+            closeImageModal();
+        }
+        // close when clicking outside the image
+        if (ev.target && ev.target.id === 'imageModal') {
+            closeImageModal();
+        }
+    });
+
+    const API_URL = "{{ url('/api') }}";
+    if (typeof axios !== 'undefined') {
+        axios.defaults.baseURL = API_URL;
+        axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+        axios.defaults.headers.common['Accept'] = 'application/json';
+        // send cookies for sanctum stateful auth by default
+        axios.defaults.withCredentials = true;
+    }
+
+    // Ensure the welcome name is updated correctly
+    const welcomeEl = document.getElementById('welcomeName');
+    if (welcomeEl) welcomeEl.innerText = me.name || me.email || 'Pacient';
+
+    // Fix logout button functionality
+    async function handleLogout() {
+        try {
+            await axios.post('/logout');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        } catch (err) {
+            console.error('Chyba pri odhlásení', err);
+            alert('Nepodarilo sa odhlásiť. Skúste to znova.');
+        }
+    }
+
+    // Attach logout event listener
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+
+    async function loadPatientExams() {
+        try {
+            // Ensure Authorization header is set from stored token before calling /user
+            const token = localStorage.getItem('userToken');
+            if (token && typeof axios !== 'undefined') {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            } else {
+                // remove Authorization header if no token
+                if (axios.defaults && axios.defaults.headers && axios.defaults.headers.common) delete axios.defaults.headers.common['Authorization'];
+            }
+
+            // get current user (works with sanctum/session or token)
+            let me = null;
+            try {
+                const meResp = await axios.get('/user');
+                // support both shapes: {id,name,...} or {user: {...}}
+                me = meResp && meResp.data ? (meResp.data.user ? meResp.data.user : meResp.data) : null;
+            } catch (err) {
+                // fallback: try to read user from localStorage (set during API login)
+                try {
+                    const local = localStorage.getItem('user');
+                    me = local ? JSON.parse(local) : null;
+                } catch (e) {
+                    me = null;
+                }
+            }
+
+            if (!me || !me.id) {
+                console.warn('Cannot determine current user for fetching exams.');
+                const listEl = document.querySelector('.exam-list');
+                if (listEl) listEl.innerHTML = '<div class="exam-item">Nie je prihlásený používateľ.</div>';
+                return;
+            }
+
+            // set welcome name
+            const welcomeEl = document.getElementById('welcomeName');
+            if (welcomeEl) welcomeEl.innerText = me.name || me.email || 'Pacient';
+
+            const res = await axios.get(`/patients/${me.id}/examinations`);
+            const exams = res && res.data ? res.data : [];
+            const list = document.querySelector('.exam-list');
+            if (!list) return;
+            if (!exams || exams.length === 0) {
+                list.innerHTML = '<div class="exam-item">Žiadne vyšetrenia.</div>';
+                return;
+            }
+            list.innerHTML = exams.map(e => {
+                // robust date parse: convert space to T for ISO, fallback to raw
+                let date = '';
+                if (e.created_at) {
+                    try {
+                        const iso = String(e.created_at).replace(' ', 'T');
+                        const dt = new Date(iso);
+                        if (!isNaN(dt)) date = dt.toLocaleString('sk-SK', { dateStyle: 'short', timeStyle: 'short' });
+                        else date = e.created_at;
+                    } catch (ex) { date = e.created_at; }
+                }
+                const doctorName = e.doctor ? (e.doctor.name + ' ' + (e.doctor.surname || '')) : 'Neznámy';
+                const photoHtml = e.photo_url ? `<img src="${e.photo_url}" style="width:100%;height:100%;object-fit:cover;" alt="Vyšetrenie #${e.id}" />` : `<div style="width:100%;height:100%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#9ca3af">No image</div>`;
+                const viewHref = e.photo_url ? e.photo_url : '#';
+                return `
+                <div class="exam-item">
+                    <div style="width:96px;height:64px;overflow:hidden;border-radius:8px;">${photoHtml}</div>
+                    <div class="exam-info">
+                        <div class="exam-date">${date}</div>
+                        <h4 class="exam-name">Vyšetrenie #${e.id}</h4>
+                        <p class="exam-status ${e.result === 'positive' ? 'status-completed' : 'status-completed'}">${e.result ? e.result : 'N/A'}</p>
+                        <div style="font-size:0.9rem;color:#6b7280;margin-top:6px;">Doktor: ${doctorName}</div>
+                    </div>
+                    <a class="exam-link" href="${viewHref}" data-photo="${viewHref}" class="view-photo">Zobraziť</a>
+                </div>
+            `;
+            }).join('');
+
+            // attach delegated click handler to open images reliably (works on mobile)
+            document.querySelectorAll('.exam-list .exam-link').forEach(a => {
+                a.addEventListener('click', function (ev) {
+                    const url = this.getAttribute('data-photo');
+                    if (!url || url === '#') {
+                        ev.preventDefault();
+                        alert('Fotka pre toto vyšetrenie nie je dostupná.');
+                        return;
+                    }
+                    // Open the modal with the image
+                    showImageModal(url);
+                    ev.preventDefault();
+                });
+            });
+         } catch (err) {
+             console.error('Chyba pri načítaní vyšetrení', err);
+         }
+     }
+
+     loadPatientExams();
+</script>
 
 </body>
 </html>

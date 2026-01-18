@@ -54,4 +54,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // Relationships
+    public function doctorExaminations()
+    {
+        return $this->hasMany(Examination::class, 'doctor_id');
+    }
+
+    public function patientExaminations()
+    {
+        return $this->hasMany(Examination::class, 'patient_id');
+    }
 }

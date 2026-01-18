@@ -281,6 +281,13 @@
                 <button type="submit" class="btn-submit">Prihlásiť sa</button>
             </form>
 
+            <!-- Fallback non-AJAX login form (submitted when AJAX fails) -->
+            <form id="fallbackLoginForm" method="POST" action="/web-login" style="display:none;">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="email" id="fallbackEmail" />
+                <input type="hidden" name="password" id="fallbackPassword" />
+            </form>
+
             <div class="login-footer">
                 <p class="login-footer-text">
                     Nemáte účet?
@@ -292,8 +299,16 @@
 </main>
 
 <script>
-    // Nastavte správnu URL k tvojmu Laravel Back-endu
-    const API_URL = 'http://127.0.0.1:8000/api';
+    // Nastavíme URL k Laravel Back-endu z prostredia, aby nebola hardcoded
+    const API_URL = '{{ url('/api') }}';
+
+    // Ensure axios exists and set defaults used across the app
+    if (typeof axios !== 'undefined') {
+        axios.defaults.baseURL = API_URL;
+        axios.defaults.withCredentials = true; // send cookies for sanctum/session flows
+        axios.defaults.headers.common['Accept'] = 'application/json';
+        axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    }
 
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -303,20 +318,53 @@
         const password = document.getElementById('password').value;
 
         try {
-            // 2. Volanie Laravel API s Axios na /api/login
-            const response = await axios.post(`${API_URL}/login`, {
+            // Clear any stale token/cookie state before attempting token-based login
+            try {
+                localStorage.removeItem('userToken');
+            } catch (e) { /* ignore */ }
+            if (axios.defaults && axios.defaults.headers && axios.defaults.headers.common) {
+                delete axios.defaults.headers.common['Authorization'];
+            }
+            // For this token-based login call we don't want to send cookies (avoid server HTML redirect responses)
+            const originalWithCredentials = axios.defaults.withCredentials;
+            axios.defaults.withCredentials = false;
+
+            // 2. Volanie Laravel API s Axios na /login (baseURL sa už nastaví)
+            const response = await axios.post(`/login`, {
                 email: email,
                 password: password,
             });
 
-            // Ak je úspech (Status 200 OK):
-            const { access_token, user } = response.data;
+            // restore withCredentials to previous value
+            axios.defaults.withCredentials = originalWithCredentials;
+
+            // Tolerant parsing: accept multiple possible shapes returned by different auth implementations
+            const data = response && response.data ? response.data : null;
+            const access_token = data?.access_token || data?.token || data?.accessToken || data?.data?.access_token || null;
+            const user = data?.user || data?.data?.user || null;
+
+            if (!user || !access_token) {
+                console.error('Unexpected login response (full):', response);
+                // If server returned HTML (e.g. redirect), show more helpful guidance
+                const contentType = response && response.headers && response.headers['content-type'] ? response.headers['content-type'] : null;
+                let debugMsg = '';
+                if (contentType && contentType.includes('text/html')) {
+                    debugMsg = 'Server returned HTML (possible redirect). Try clearing cookies or use the non-AJAX login.';
+                } else if (response && response.status && response.status !== 200) {
+                    debugMsg = `Server returned status ${response.status}.`;
+                } else {
+                    debugMsg = 'Server returned an unexpected JSON shape.';
+                }
+                alert('Prihlásenie zlyhalo: server nevrátil očakávané údaje. ' + debugMsg + ' Skontrolujte backend alebo konzolu pre viac detailov.');
+                return;
+            }
 
             // 3. Uloženie tokenu a user dát do prehliadača (localStorage)
             localStorage.setItem('userToken', access_token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            console.log('Prihlásenie úspešné. Token uložený pre: ' + user.email);
+            // Defensive console.log: use optional chaining so we don't read .email of null
+            console.log('Prihlásenie úspešné. Token uložený pre: ' + (user?.email ?? '[email not provided]'));
 
             // 4. Presmerovanie na chránený dashboard
             window.location.href = '/dashboard';
@@ -332,10 +380,32 @@
                     errorMessage = 'Nesprávny email alebo heslo.';
                 } else if (error.response.data && error.response.data.message) {
                     errorMessage = error.response.data.message;
-                } else if (error.response.data.errors && error.response.data.errors.email) {
+                } else if (error.response.data && error.response.data.errors && error.response.data.errors.email) {
                     // Ak nastane chyba validácie (napr. rate limit)
                     errorMessage = error.response.data.errors.email[0];
+                } else {
+                    // show response body for debugging
+                    console.error('Login error response data:', error.response.data);
                 }
+            } else if (error.request) {
+                // Request bol odoslaný ale odpoveď neprichádza (možno CORS alebo server offline)
+                console.error('No response received. Possible server offline or CORS issue.', error.request);
+                errorMessage = 'Server neodpovedá. Skontrolujte, či je back-end spustený a CORS nastavenie.';
+
+                // Submit fallback non-AJAX form so the server can attempt a regular session-based login
+                try {
+                    document.getElementById('fallbackEmail').value = email;
+                    document.getElementById('fallbackPassword').value = password;
+                    document.getElementById('fallbackLoginForm').submit();
+                    return; // don't show alert because we're redirecting
+                } catch (e) {
+                    console.error('Fallback form submit failed:', e);
+                }
+            } else {
+                // Niečo sa pokazilo pri nastavovaní requestu
+                console.error('Error setting up request:', error.message);
+                // if this is a runtime TypeError (like reading user.email), show friendly message and log details
+                errorMessage = 'Chyba pri príprave požiadavky: ' + (error.message || String(error));
             }
 
             alert(errorMessage);

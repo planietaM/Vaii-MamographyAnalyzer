@@ -526,6 +526,27 @@
     </div>
 </div>
 
+<!-- Examination upload modal -->
+<div id="examModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; padding:1rem; border-radius:8px; width:520px; max-width:95%;">
+        <h3 id="examModalTitle">Nahraj vyšetrenie</h3>
+        <form id="examForm">
+            <input type="hidden" id="examPatientId" />
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                <input type="file" accept="image/*" id="examPhoto" style="flex:1; padding:8px;" />
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
+                <label><input type="radio" name="result" value="negative" checked /> Negatívny</label>
+                <label><input type="radio" name="result" value="positive" /> Pozitívny</label>
+            </div>
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button type="button" onclick="closeExamModal()" style="padding:8px 12px;">Zrušiť</button>
+                <button id="uploadExamBtn" type="button" onclick="uploadExam()" style="background:#9c0b8e;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Nahrať</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="container">
     <section class="admin-dashboard">
 
@@ -669,7 +690,7 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     // Base API URL for requests
-    const API_URL = '{{ url('/') }}';
+    const API_URL = '{{ url('/api') }}';
 
     // Configure axios default headers
     // Set CSRF token for axios
@@ -678,6 +699,8 @@
         axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfMeta.getAttribute('content');
     }
     axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    // Ensure axios uses the API base URL
+    axios.defaults.baseURL = API_URL;
 
     async function viewUser(id) {
         try {
@@ -687,6 +710,14 @@
             alert('Chyba pri načítaní používateľa');
             console.error(err);
         }
+    }
+
+    // Open exam modal for uploading an exam for a given patient (called by doctor buttons)
+    function openExamModalForPatient(patientId) {
+        document.getElementById('examPatientId').value = patientId;
+        document.getElementById('examModalTitle').innerText = 'Nahraj vyšetrenie pre pacienta ' + patientId;
+        document.getElementById('examForm').reset?.();
+        document.getElementById('examModal').style.display = 'flex';
     }
 
     function openUserModal(user, mode = 'edit') {
@@ -772,6 +803,36 @@
             localStorage.removeItem('user');
             window.location.href = '/prihlasenie';
         });
+    }
+
+    function closeExamModal() {
+        const modal = document.getElementById('examModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async function uploadExam() {
+        const patientId = document.getElementById('examPatientId').value;
+        const fileInput = document.getElementById('examPhoto');
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alert('Vyber súbor s fotkou');
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append('patient_id', patientId);
+        fd.append('photo', fileInput.files[0]);
+        const result = document.querySelector('input[name="result"]:checked').value;
+        fd.append('result', result);
+
+        try {
+            const res = await axios.post('/admin/examinations', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            alert('Vyšetrenie uložené');
+            closeExamModal();
+            window.location.reload();
+        } catch (err) {
+            console.error('Chyba pri nahrávaní vyšetrenia', err);
+            alert('Chyba pri nahrávaní vyšetrenia');
+        }
     }
 </script>
 

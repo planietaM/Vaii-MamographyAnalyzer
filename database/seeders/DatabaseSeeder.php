@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class, // <--- PRIDAŤ TÚTO RADU
             // ... prípadne ďalšie seedery
             \Database\Seeders\DoctorCodesSeeder::class,
+            \Database\Seeders\FakeUsersSeeder::class,
         ]);
 
         User::factory()->create([
