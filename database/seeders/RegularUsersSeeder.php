@@ -15,8 +15,8 @@ class RegularUsersSeeder extends Seeder
     {
         $users = [
             [
-                'name' => 'Anna',
-                'surname' => 'Kovacova',
+                'name' => 'Anna ',
+                'surname' => 'Kovacova ',
                 'email' => 'user1@example.com',
                 'password' => 'password',
                 'phone' => '+421905111111',
