@@ -293,7 +293,19 @@
 
 <script>
     // Nastavte správnu URL k tvojmu Laravel Back-endu
-    const API_URL = 'http://127.0.0.1:8000/api';
+    // Use Laravel url() so the frontend always targets the same host/port as the backend
+    const API_URL = "{{ url('/api') }}";
+
+    // Configure axios defaults to help avoid CORS/host mismatch issues
+    if (typeof axios !== 'undefined') {
+        axios.defaults.baseURL = API_URL;
+        // include X-Requested-With header
+        axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+        // ensure server returns JSON instead of redirecting to HTML when unauthorized
+        axios.defaults.headers.common['Accept'] = 'application/json';
+        // if you use cookie-based auth (Sanctum SPA), enable withCredentials
+        // axios.defaults.withCredentials = true;
+    }
 
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -304,19 +316,35 @@
 
         try {
             // 2. Volanie Laravel API s Axios na /api/login
-            const response = await axios.post(`${API_URL}/login`, {
-                email: email,
-                password: password,
-            });
+            // use baseURL so this becomes POST to {API_URL}/login
+            const response = await axios.post('/login', { email, password });
+
+            // Debug: log raw response for troubleshooting when structure is unexpected
+            console.log('Login response:', response);
 
             // Ak je úspech (Status 200 OK):
-            const { access_token, user } = response.data;
+            const respData = response && response.data ? response.data : {};
+            const access_token = respData.access_token || respData.token || respData.accessToken || null;
+            const user = respData.user || null;
 
             // 3. Uloženie tokenu a user dát do prehliadača (localStorage)
-            localStorage.setItem('userToken', access_token);
-            localStorage.setItem('user', JSON.stringify(user));
+            if (access_token) {
+                localStorage.setItem('userToken', access_token);
+                // set axios Authorization header for subsequent requests in this tab
+                if (typeof axios !== 'undefined') {
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+                }
+            } else {
+                console.warn('No access_token in login response', respData);
+            }
 
-            console.log('Prihlásenie úspešné. Token uložený pre: ' + user.email);
+            if (user) {
+                localStorage.setItem('user', JSON.stringify(user));
+                const userLabel = (user && (user.email || user.id)) ? (user.email || user.id) : 'unknown';
+                console.log('Prihlásenie úspešné. Token uložený pre: ' + userLabel);
+            } else {
+                console.warn('No user object in login response');
+            }
 
             // 4. Presmerovanie na chránený dashboard
             window.location.href = '/dashboard';
@@ -332,10 +360,22 @@
                     errorMessage = 'Nesprávny email alebo heslo.';
                 } else if (error.response.data && error.response.data.message) {
                     errorMessage = error.response.data.message;
-                } else if (error.response.data.errors && error.response.data.errors.email) {
+                } else if (error.response.data && error.response.data.errors && error.response.data.errors.email) {
                     // Ak nastane chyba validácie (napr. rate limit)
                     errorMessage = error.response.data.errors.email[0];
+                } else {
+                    // show response body for debugging
+                    console.error('Login error response data:', error.response.data);
                 }
+            } else if (error.request) {
+                // Request bol odoslaný ale odpoveď neprichádza (možno CORS alebo server offline)
+                console.error('No response received. Possible server offline or CORS issue.', error.request);
+                errorMessage = 'Server neodpovedá. Skontrolujte, či je back-end spustený a CORS nastavenie.';
+            } else {
+                // Niečo sa pokazilo pri nastavovaní requestu
+                console.error('Error setting up request:', error.message);
+                // if this is a runtime TypeError (like reading user.email), show friendly message and log details
+                errorMessage = 'Chyba pri príprave požiadavky: ' + (error.message || String(error));
             }
 
             alert(errorMessage);

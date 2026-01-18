@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+
 class AdminUserSeeder extends Seeder
 {
     /**
@@ -14,29 +15,26 @@ class AdminUserSeeder extends Seeder
      */
     public function run()
     {
-        // Pôvodné dáta admina, ktoré sa používajú na nájdenie riadku:
-        $original_email = 'admin@mamography.sk';
+        // Použijeme env premenné, ak sú dostupné, inak použijeme predvolené hodnoty
+        $adminEmail = env('SEED_ADMIN_EMAIL', 'admin@mamography.sk');
+        $adminName = env('SEED_ADMIN_NAME', 'Admin');
+        $adminPassword = env('SEED_ADMIN_PASSWORD', 'password');
 
-        // NOVÉ DÁTA, KTORÉ CHCETE NASTAVIŤ:
-        $new_email = 'mamo@sk'; // TOTO JE VÁŠ NOVÝ E-MAIL
-        $new_password = '12345678';     // TOTO JE VÁŠ NOVÉ, JEDNODUCHÉ HESLO
+        // Použijeme updateOrCreate, aby bol seeder idempotentný
+        $admin = User::updateOrCreate(
+            ['email' => $adminEmail],
+            [
+                'name' => $adminName,
+                'email' => $adminEmail,
+                'password' => Hash::make($adminPassword),
+                'role' => 'admin',
+            ]
+        );
 
-        // 1. Nájdeme Admina podľa pôvodného e-mailu
-        $admin = User::where('email', $original_email)->first();
-
-        if ($admin) {
-            // 2. Ak Admin existuje, aktualizujeme mu údaje
-            $admin->email = $new_email;
-            $admin->password = Hash::make($new_password);
-            // Ak chcete zmeniť meno:
-            // $admin->name = 'Super Admin';
-
-            $admin->save();
-            $this->command->info("Admin bol úspešne aktualizovaný na $new_email.");
+        if ($admin->wasRecentlyCreated) {
+            $this->command->info("Admin vytvoren: {$adminEmail}");
         } else {
-            // Ak neexistuje, môžete ho vytvoriť (pôvodná logika seederu)
-            // Môžete tu nechať pôvodný kód, ak ho potrebujete
-            $this->command->error("Admin s e-mailom $original_email nebol nájdený. Žiadna aktualizácia neprebehla.");
+            $this->command->info("Admin aktualizovaný (alebo už existoval): {$adminEmail}");
         }
     }
 }

@@ -695,6 +695,17 @@
         document.getElementById('userSurname').value = user.surname || '';
         document.getElementById('userEmail').value = user.email || '';
         document.getElementById('userPhone').value = user.phone || '';
+        // populate role and dikter_id so admin can see them but not change role
+        const roleEl = document.getElementById('userRole');
+        if (roleEl) {
+            roleEl.value = user.role || 'patient';
+            // disable role selection to prevent changing user roles from this modal
+            roleEl.setAttribute('disabled', 'disabled');
+        }
+        const dikterEl = document.getElementById('userDikter');
+        if (dikterEl) {
+            dikterEl.value = user.dikter_id || '';
+        }
 
         const saveBtn = document.getElementById('saveUserBtn');
         if (mode === 'view') {
@@ -729,7 +740,7 @@
             surname: document.getElementById('userSurname').value,
             email: document.getElementById('userEmail').value,
             phone: document.getElementById('userPhone').value,
-
+            dikter_id: document.getElementById('userDikter') ? document.getElementById('userDikter').value : null,
         };
 
         try {
@@ -739,7 +750,20 @@
             // optionally refresh page to show updated data
             window.location.reload();
         } catch (err) {
-            alert('Chyba pri uložení');
+            // show validation errors returned by Laravel if present
+            if (err.response && err.response.data) {
+                const data = err.response.data;
+                if (data.errors) {
+                    const messages = Object.values(data.errors).flat().join('\n');
+                    alert('Chyba pri uložení:\n' + messages);
+                } else if (data.message) {
+                    alert('Chyba pri uložení: ' + data.message);
+                } else {
+                    alert('Chyba pri uložení (server error)');
+                }
+            } else {
+                alert('Chyba pri uložení (network error)');
+            }
             console.error(err);
         }
     }
@@ -765,11 +789,19 @@
             return;
         }
 
-        axios.post(`${API_URL}/logout`, {}, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        // Call the API logout endpoint (registered under /api/logout)
+        axios.post('/api/logout', {}, {
+            headers: { 'Authorization': `Bearer ${token}` },
+        }).catch((err) => {
+            // Log the error but proceed to clear local state regardless
+            console.error('Logout request failed:', err);
         }).finally(() => {
             localStorage.removeItem('userToken');
             localStorage.removeItem('user');
+            // remove axios auth header if set
+            if (axios.defaults.headers.common['Authorization']) {
+                delete axios.defaults.headers.common['Authorization'];
+            }
             window.location.href = '/prihlasenie';
         });
     }

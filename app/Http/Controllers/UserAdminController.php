@@ -20,10 +20,14 @@ class UserAdminController extends Controller
             'surname' => ['nullable','string','max:255'],
             'email' => ['required','email', Rule::unique('users','email')->ignore($user->id)],
             'phone' => ['nullable','string','max:50'],
-            'role' => ['required', Rule::in(['admin','doctor','patient'])],
+            'role' => ['sometimes', Rule::in(['admin','doctor','patient'])],
             'dikter_id' => ['nullable','string','max:20', Rule::unique('users','dikter_id')->ignore($user->id)],
             'national_id' => ['nullable','string','max:20', Rule::unique('users','national_id')->ignore($user->id)],
         ]);
+
+        if (array_key_exists('role', $data)) {
+            unset($data['role']);
+        }
 
         $user->fill($data);
         $user->save();
@@ -37,4 +41,3 @@ class UserAdminController extends Controller
         return response()->json(['message' => 'User deleted']);
     }
 }
-

@@ -17,11 +17,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call([
-            AdminUserSeeder::class, // <--- PRIDAŤ TÚTO RADU
-            // ... prípadne ďalšie seedery
             \Database\Seeders\DoctorCodesSeeder::class,
+            AdminUserSeeder::class,
+            \Database\Seeders\DoctorUsersSeeder::class,
+            \Database\Seeders\RegularUsersSeeder::class,
+            // ... prípadne ďalšie seedery
         ]);
 
+        // Optional test user (kept for compatibility)
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
