@@ -14,9 +14,10 @@
 <header>
     <div class="container nav">
         <ul class="nav-links">
-            <li><a href="#">Skríning rakoviny</a></li>
+            <li><a href="/">Domov</a></li>
+            <li><a href="{{ route('skrining') }}">Skríning rakoviny</a></li>
             <li><a href="#">Pacienti</a></li>
-            <li><a href="#">O nás</a></li>
+            <li><a href="{{ route('o-nas') }}">O nás</a></li>
             <li><a href="#">Partneri</a></li>
             <li><a href="{{ route('users.list') }}">Kontaktujte nás</a></li>
         </ul>

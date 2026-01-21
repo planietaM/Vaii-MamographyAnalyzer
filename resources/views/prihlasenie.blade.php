@@ -242,7 +242,7 @@
         <div class="logo">Mamography Analyzer</div>
         <ul class="nav-links">
             <li><a href="/">Domov</a></li>
-            <li><a href="#">O nás</a></li>
+            <li><a href="{{ route('o-nas') }}">O nás</a></li>
             <li><a href="#">Kontakt</a></li>
         </ul>
     </div>
@@ -317,6 +317,9 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
+        // Save original withCredentials so we always restore it
+        const originalWithCredentials = axios.defaults.withCredentials;
+
         try {
             // Clear any stale token/cookie state before attempting token-based login
             try {
@@ -325,9 +328,8 @@
             if (axios.defaults && axios.defaults.headers && axios.defaults.headers.common) {
                 delete axios.defaults.headers.common['Authorization'];
             }
-            // For this token-based login call we don't want to send cookies (avoid server HTML redirect responses)
-            const originalWithCredentials = axios.defaults.withCredentials;
-            axios.defaults.withCredentials = false;
+            // Ensure we send cookies so the backend can create a session cookie if it wants
+            axios.defaults.withCredentials = true;
 
             // 2. Volanie Laravel API s Axios na /login (baseURL sa už nastaví)
             const response = await axios.post(`/login`, {
@@ -335,8 +337,7 @@
                 password: password,
             });
 
-            // restore withCredentials to previous value
-            axios.defaults.withCredentials = originalWithCredentials;
+            // Do NOT change withCredentials here (keep sending cookies)
 
             // Tolerant parsing: accept multiple possible shapes returned by different auth implementations
             const data = response && response.data ? response.data : null;
@@ -363,6 +364,9 @@
             localStorage.setItem('userToken', access_token);
             localStorage.setItem('user', JSON.stringify(user));
 
+            // set Authorization header for future API calls
+            axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
             // Defensive console.log: use optional chaining so we don't read .email of null
             console.log('Prihlásenie úspešné. Token uložený pre: ' + (user?.email ?? '[email not provided]'));
 
@@ -370,6 +374,9 @@
             window.location.href = '/dashboard';
 
         } catch (error) {
+            // Ensure withCredentials remains true for consistent behavior
+            axios.defaults.withCredentials = true;
+
             console.error('Chyba pri prihlásení:', error);
 
             let errorMessage = 'Nastala chyba pri komunikácii so serverom.';

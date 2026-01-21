@@ -424,20 +424,18 @@
                 gap: 0.5rem;
             }
 
-            .btn-primary {
-                position: static;
-                transform: none;
-                margin-top: 0.75rem;
-                align-self: flex-start;
-            }
-
-            .btn-primary:hover {
-                transform: scale(1.05);
-            }
-
             .welcome-hero {
                 padding: 2rem 0;
                 margin-bottom: 2rem;
+            }
+
+            .welcome-title {
+                font-size: 1.75rem;
+                padding-right: 120px;
+            }
+
+            .welcome-subtitle {
+                font-size: 0.9rem;
             }
 
             .stats-grid {
@@ -510,12 +508,11 @@
                 <input placeholder="Telefón" name="phone" id="userPhone" style="flex:1; padding:8px;" />
             </div>
             <div style="display:flex; gap:8px; margin-bottom:8px;">
-                <select id="userRole" name="role" style="padding:8px;">
+                <select id="userRole" name="role" style="flex:1; padding:8px;">
                     <option value="patient">Pacient</option>
                     <option value="doctor">Doktor</option>
                     <option value="admin">Admin</option>
                 </select>
-                <input placeholder="Dikter ID" name="dikter_id" id="userDikter" style="flex:1; padding:8px;" />
             </div>
 
             <div style="display:flex; gap:8px; justify-content:flex-end;">
@@ -645,7 +642,7 @@
                         <tr>
                             <th>Pacient</th>
                             <th>Meno</th>
-                            <td>Priezvisko</td>
+                            <th>Priezvisko</th>
                             <th>Email</th>
                             <th>Telefón</th>
                             <th>Posledné vyšetrenie</th>
@@ -665,17 +662,17 @@
                                 </div>
                             </td>
                             <td>{{ $p->name }}</td>
-                            <td>{{ $p->surname }}</td>
-                            <td>{{ $p->birth_date ? \Carbon\Carbon::parse($p->birth_date)->age . ' rokov' : '-' }}</td>
+                            <td>{{ $p->surname ?? '-' }}</td>
+                            <td>{{ $p->email }}</td>
                             <td>{{ $p->phone ?? '-' }}</td>
-                            <td>{{ $p->last_exam_date ?? '-' }}</td>
+                            <td>{{ $p->last_exam_date ?? 'Žiadne vyšetrenie' }}</td>
                             <td><button class="btn-action btn-view" onclick="viewUser({{ $p->id }})">Zobraziť</button></td>
                             <td><button class="btn-action btn-edit" onclick="openUserModal({{ json_encode($p) }})">Upraviť</button></td>
                             <td><button class="btn-action btn-delete" onclick="deleteUser({{ $p->id }})">Vymazať</button></td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8">Žiadni pacienti.</td>
+                            <td colspan="9">Žiadni pacienti.</td>
                         </tr>
                         @endforelse
                         </tbody>
@@ -689,9 +686,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-    // Base API URL for requests
-    const API_URL = '{{ url('/api') }}';
-
     // Configure axios default headers
     // Set CSRF token for axios
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
@@ -699,13 +693,13 @@
         axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfMeta.getAttribute('content');
     }
     axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-    // Ensure axios uses the API base URL
-    axios.defaults.baseURL = API_URL;
+    // NO baseURL - používame relatívne cesty od root
 
     async function viewUser(id) {
         try {
             const res = await axios.get(`/admin/users/${id}`);
-            openUserModal(res.data, 'view');
+            const payload = res && res.data ? res.data : res;
+            openUserModal(payload, 'view');
         } catch (err) {
             alert('Chyba pri načítaní používateľa');
             console.error(err);
@@ -721,23 +715,35 @@
     }
 
     function openUserModal(user, mode = 'edit') {
-        document.getElementById('userId').value = user.id;
+        user = user || {};
+        document.getElementById('userId').value = user.id || '';
         document.getElementById('userName').value = user.name || '';
         document.getElementById('userSurname').value = user.surname || '';
         document.getElementById('userEmail').value = user.email || '';
         document.getElementById('userPhone').value = user.phone || '';
 
+        // Nastavenie roly
+        const roleSelect = document.getElementById('userRole');
+        if (roleSelect) {
+            roleSelect.value = user.role || 'patient';
+            // Rola je VŽDY disabled - nemôže sa meniť
+            roleSelect.setAttribute('disabled', 'disabled');
+        }
+
+
         const saveBtn = document.getElementById('saveUserBtn');
         if (mode === 'view') {
             document.getElementById('modalTitle').innerText = 'Zobraziť používateľa';
-            ['userName','userSurname','userEmail','userPhone',].forEach(id => {
-                document.getElementById(id).setAttribute('disabled','disabled');
+            ['userName','userSurname','userEmail','userPhone'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('disabled','disabled');
             });
             if (saveBtn) saveBtn.style.display = 'none';
         } else {
-            document.getElementById('modalTitle').innerText = 'Uprav používateľa';
-            ['userName','userSurname','userEmail','userPhone',].forEach(id => {
-                document.getElementById(id).removeAttribute('disabled');
+            document.getElementById('modalTitle').innerText = 'Upraviť používateľa';
+            ['userName','userSurname','userEmail','userPhone'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.removeAttribute('disabled');
             });
             if (saveBtn) saveBtn.style.display = 'inline-block';
         }
@@ -760,7 +766,6 @@
             surname: document.getElementById('userSurname').value,
             email: document.getElementById('userEmail').value,
             phone: document.getElementById('userPhone').value,
-
         };
 
         try {
@@ -770,7 +775,7 @@
             // optionally refresh page to show updated data
             window.location.reload();
         } catch (err) {
-            alert('Chyba pri uložení');
+            alert('Chyba pri uložení: ' + (err.response?.data?.message || err.message));
             console.error(err);
         }
     }
@@ -782,7 +787,7 @@
             alert('Používateľ vymazaný');
             window.location.reload();
         } catch (err) {
-            alert('Chyba pri mazani');
+            alert('Chyba pri mazaní: ' + (err.response?.data?.message || err.message));
             console.error(err);
         }
     }
@@ -796,7 +801,7 @@
             return;
         }
 
-        axios.post(`${API_URL}/logout`, {}, {
+        axios.post('/api/logout', {}, {
             headers: { 'Authorization': `Bearer ${token}` }
         }).finally(() => {
             localStorage.removeItem('userToken');
@@ -833,8 +838,10 @@
             console.error('Chyba pri nahrávaní vyšetrenia', err);
             alert('Chyba pri nahrávaní vyšetrenia');
         }
-    }
+    });
 </script>
+
+<script src="/js/admin.js"></script>
 
 </body>
 </html>

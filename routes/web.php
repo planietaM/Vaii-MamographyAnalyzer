@@ -10,6 +10,14 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::get('/o-nas', function () {
+    return view('o-nas');
+})->name('o-nas');
+
+Route::get('/skrining-rakoviny', function () {
+    return view('skrining');
+})->name('skrining');
+
 // TÁTO RÚTA ZOBRAZÍ PRIHLÁSENIE:
 Route::get('/prihlasenie', function () {
     return view('prihlasenie');
@@ -35,12 +43,27 @@ Route::get('/dashboard', function () {
         // Prepare DB-driven data for admin dashboard and return view directly
         $doctorsCount = User::where('role', 'doctor')->count();
         $patientsCount = User::where('role', 'patient')->count();
-        // 'analyses' data not available in schema; keep 0 as placeholder
-        $analysesCount = 0;
-        $todayCount = 0;
+
+        // Počet všetkých vyšetrení z databázy examinations
+        $analysesCount = \App\Models\Examination::count();
+
+        // Počet vyšetrení vykonaných dnes
+        $todayCount = \App\Models\Examination::whereDate('created_at', today())->count();
 
         $doctors = User::where('role', 'doctor')->orderBy('id')->get();
-        $patients = User::where('role', 'patient')->orderBy('id')->get();
+
+        // Načítaj pacientov s ich posledným vyšetrením
+        $patients = User::where('role', 'patient')->orderBy('id')->get()->map(function($patient) {
+            // Nájdi posledné vyšetrenie pacienta
+            $lastExam = \App\Models\Examination::where('patient_id', $patient->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            // Pridaj dátum posledného vyšetrenia k pacientovi
+            $patient->last_exam_date = $lastExam ? $lastExam->created_at->format('d.m.Y') : null;
+
+            return $patient;
+        });
 
         return view('admin', [
             'doctorsCount' => $doctorsCount,

@@ -42,9 +42,11 @@ class ExaminationController extends Controller
         $mapped = $exams->map(function ($e) {
             return [
                 'id' => $e->id,
+                'patient_id' => $e->patient_id,
                 'created_at' => $e->created_at,
                 'result' => $e->result,
                 'notes' => $e->notes,
+                'photo' => $e->photo,
                 'photo_url' => $e->photo_url,
                 'patient' => $e->patient ? [ 'id' => $e->patient->id, 'name' => $e->patient->name, 'surname' => $e->patient->surname ] : null,
             ];
@@ -90,6 +92,7 @@ class ExaminationController extends Controller
             'photo' => ['nullable', 'file', 'image', 'max:5120'],
             'result' => [ 'nullable', Rule::in(['positive','negative'])],
             'notes' => ['nullable','string'],
+            'created_at' => ['nullable', 'date_format:Y-m-d H:i:s'],
         ]);
 
         if ($request->hasFile('photo')) {
@@ -106,15 +109,41 @@ class ExaminationController extends Controller
         if (isset($data['notes'])) {
             $examination->notes = $data['notes'];
         }
+        if (isset($data['created_at'])) {
+            $examination->created_at = $data['created_at'];
+        }
 
         $examination->save();
 
-        return response()->json(['message' => 'Examination updated', 'examination' => $examination]);
+        return response()->json([
+            'message' => 'Examination updated',
+            'examination' => [
+                'id' => $examination->id,
+                'patient_id' => $examination->patient_id,
+                'doctor_id' => $examination->doctor_id,
+                'created_at' => $examination->created_at,
+                'result' => $examination->result,
+                'notes' => $examination->notes,
+                'photo' => $examination->photo,
+                'photo_url' => $examination->photo_url,
+            ]
+        ]);
     }
 
     public function show(Examination $examination)
     {
-        return response()->json($examination);
+        return response()->json([
+            'id' => $examination->id,
+            'patient_id' => $examination->patient_id,
+            'doctor_id' => $examination->doctor_id,
+            'created_at' => $examination->created_at,
+            'result' => $examination->result,
+            'notes' => $examination->notes,
+            'photo' => $examination->photo,
+            'photo_url' => $examination->photo_url,
+            'patient' => $examination->patient ? [ 'id' => $examination->patient->id, 'name' => $examination->patient->name, 'surname' => $examination->patient->surname ] : null,
+            'doctor' => $examination->doctor ? [ 'id' => $examination->doctor->id, 'name' => $examination->doctor->name, 'surname' => $examination->doctor->surname ] : null,
+        ]);
     }
 
     public function destroy(Examination $examination)

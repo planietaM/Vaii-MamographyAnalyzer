@@ -34,7 +34,7 @@
                 <p class="hero-sub">
                     Bezpečnostná podpora umelej inteligencie pre detekciu rakoviny prsníka
                 </p>
-                <button class="hero-btn">Viac informácií</button>
+                <a href="{{ route('skrining') }}" class="hero-btn">Viac informácií</a>
             </div>
         </div>
     </section>
@@ -102,7 +102,7 @@
     </section>
 
     {{-- ZISTITE VIAC --}}
-    <section class="more-section">
+    <section class="more-section" style="padding-bottom: 60px;">
         <h3>Zistite viac</h3>
 
         <div class="more-grid">
@@ -152,7 +152,7 @@
         </div>
     </section>
 
-    </div>
+
 
 @endsection
 

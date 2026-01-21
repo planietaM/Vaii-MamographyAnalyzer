@@ -103,6 +103,7 @@
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            border: none;
         }
         .hero-logout:hover { transform: translateY(-2px); }
 
@@ -242,7 +243,7 @@
             border-radius: 1rem;
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
             display: grid;
-            grid-template-columns: auto 1fr auto;
+            grid-template-columns: 1fr auto;
             align-items: center;
             gap: 1.5rem;
         }
@@ -267,14 +268,19 @@
             display: inline-block;
         }
 
-        .status-completed {
+        .status-positive {
             background: #d1fae5;
             color: #065f46;
         }
 
-        .status-scheduled {
-            background: #dbeafe;
-            color: #1e40af;
+        .status-negative {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-unknown {
+            background: #f3f4f6;
+            color: #6b7280;
         }
 
         .exam-link {
@@ -288,7 +294,23 @@
             text-decoration: underline;
         }
 
+        .exam-notes {
+            font-size: 0.85rem;
+            color: #374151;
+            margin-top: 6px;
+            font-style: normal;
+            display: block;
+        }
+
         /* Mobile */
+        @media (max-width: 768px) {
+            .exam-notes {
+                max-width: 250px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
         @media (max-width: 768px) {
             header {
                 padding-block: 0.75rem 0.5rem;
@@ -317,17 +339,18 @@
                 align-self: flex-start;
             }
 
-            /* Make hero logout flow naturally on mobile (no absolute overlap) */
-            .hero-logout {
-                position: static;
-                margin: 0.5rem 0 0 auto;
-                display: inline-block;
-                transform: none;
-            }
-
             .welcome-hero {
                 padding: 2rem 0;
                 margin-bottom: 2rem;
+            }
+
+            .welcome-title {
+                font-size: 1.75rem;
+                padding-right: 120px;
+            }
+
+            .welcome-subtitle {
+                font-size: 0.9rem;
             }
 
             .stats-grid {
@@ -358,66 +381,26 @@
 
 <body>
 
-<header>
-    <div class="container nav">
-        <div class="nav-left">
-            <!-- Navigation hidden for patient; only logout button shown as requested -->
-        </div>
-
-        <!-- logout moved into welcome hero for better visual placement -->
-     </div>
- </header>
-
- <section class="welcome-hero">
-     <div class="container">
+<section class="welcome-hero">
+    <div class="container">
         <div class="welcome-content">
             <h1 class="welcome-title">Vitajte, <span id="welcomeName">pacient</span></h1>
             <p class="welcome-subtitle">
                 Tu nájdete prístup k vašim vyšetreniam a zdravotným záznamom
             </p>
         </div>
-        <!-- Logout button inside the purple hero, visually aligned to top-right -->
         <button id="logoutBtn" class="hero-logout">Odhlásiť sa</button>
-     </div>
- </section>
+    </div>
+</section>
 
 <div class="container">
     <section class="patient-dashboard">
-
-        <!-- Recent Examinations -->
         <div class="recent-section">
             <h2 class="section-title">Nedávne vyšetrenia</h2>
-
-            <div class="exam-list">
-                <div class="exam-item">
-                    <div class="exam-date">15.11.2024</div>
-                    <div class="exam-info">
-                        <h4 class="exam-name">Mamografia - skríning</h4>
-                        <p class="exam-status status-completed">Výsledok dostupný</p>
-                    </div>
-                    <a href="#" class="exam-link">Zobraziť</a>
-                </div>
-
-                <div class="exam-item">
-                    <div class="exam-date">28.10.2024</div>
-                    <div class="exam-info">
-                        <h4 class="exam-name">Konzultácia - rádiológia</h4>
-                        <p class="exam-status status-completed">Výsledok dostupný</p>
-                    </div>
-                    <a href="#" class="exam-link">Zobraziť</a>
-                </div>
-
-                <div class="exam-item">
-                    <div class="exam-date">05.12.2024</div>
-                    <div class="exam-info">
-                        <h4 class="exam-name">Mamografia - kontrola</h4>
-                        <p class="exam-status status-scheduled">Naplánované</p>
-                    </div>
-                    <a href="#" class="exam-link">Detail</a>
-                </div>
+            <div class="exam-list" id="examList">
+                <div class="exam-item">Načítavam vyšetrenia...</div>
             </div>
         </div>
-
     </section>
 </div>
 
@@ -425,26 +408,42 @@
 <div id="imageModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;z-index:10000;">
     <div style="position:relative;max-width:90%;max-height:90%;">
         <button id="imageModalClose" style="position:absolute;right:-10px;top:-10px;background:#fff;border-radius:50%;width:36px;height:36px;border:none;cursor:pointer;font-weight:700;">✕</button>
-        <img id="imageModalImg" src="" alt="Prehliadanie vyšetrenia" style="display:block;max-width:100%;max-height:90vh;border-radius:8px;" />
+        <img id="imageModalImg" src="" alt="Prehliadanie vyšetrenia" style="display:block;max-width:100%;max-height:90vh;border-radius:8px;background:#fff;" onerror="this.style.display='none';document.getElementById('imageModalError').style.display='block';" />
+        <div id="imageModalError" style="display:none;color:#fff;text-align:center;padding:2rem 1rem 1rem 1rem;font-size:1.2rem;">Fotku sa nepodarilo načítať.<br>Skontrolujte, či bola správne nahraná a je dostupná na serveri.</div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-    // modal helpers
-    function showImageModal(url) {
+<script src="/js/pacient.js"></script>
+
+</body>
+</html>
+
         const modal = document.getElementById('imageModal');
         const img = document.getElementById('imageModalImg');
-        if (!modal || !img) return;
+        const err = document.getElementById('imageModalError');
+        if (!modal || !img || !err) return;
+        if (!url) {
+            img.style.display = 'none';
+            err.style.display = 'block';
+            modal.style.display = 'flex';
+            return;
+        }
         img.src = url;
+        img.style.display = 'block';
+        err.style.display = 'none';
         modal.style.display = 'flex';
+        // Debug: vypíš URL do konzoly
+        console.log('Zobrazujem fotku:', url);
     }
     function closeImageModal() {
         const modal = document.getElementById('imageModal');
         const img = document.getElementById('imageModalImg');
-        if (!modal || !img) return;
+        const err = document.getElementById('imageModalError');
+        if (!modal || !img || !err) return;
         modal.style.display = 'none';
         img.src = '';
+        err.style.display = 'none';
     }
     document.addEventListener('click', function (ev) {
         if (ev.target && ev.target.id === 'imageModalClose') {
@@ -461,127 +460,140 @@
         axios.defaults.baseURL = API_URL;
         axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
         axios.defaults.headers.common['Accept'] = 'application/json';
-        // send cookies for sanctum stateful auth by default
+        // send cookies for sanctum/stateful auth by default
         axios.defaults.withCredentials = true;
     }
 
-    // Ensure the welcome name is updated correctly
-    const welcomeEl = document.getElementById('welcomeName');
-    if (welcomeEl) welcomeEl.innerText = me.name || me.email || 'Pacient';
-
-    // Fix logout button functionality
-    async function handleLogout() {
+    // Logout button - use token if present, otherwise rely on cookie session
+    document.getElementById('logoutBtn').onclick = async function() {
         try {
-            await axios.post('/logout');
+            const token = localStorage.getItem('userToken');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            await axios.post('/logout', {}, { headers });
+        } catch (e) {
+            console.warn('Logout request failed (continuing to clear local state)', e);
+        } finally {
             localStorage.removeItem('userToken');
             localStorage.removeItem('user');
-            window.location.href = '/login';
-        } catch (err) {
-            console.error('Chyba pri odhlásení', err);
-            alert('Nepodarilo sa odhlásiť. Skúste to znova.');
+            window.location.href = '/prihlasenie';
         }
-    }
+    };
 
-    // Attach logout event listener
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-    }
-
-    async function loadPatientExams() {
+    // Load user and exams
+    async function loadPatientData() {
+        let user = null;
         try {
-            // Ensure Authorization header is set from stored token before calling /user
+            // If we have a token, set Authorization header for axios requests
             const token = localStorage.getItem('userToken');
-            if (token && typeof axios !== 'undefined') {
+            if (token) {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             } else {
-                // remove Authorization header if no token
-                if (axios.defaults && axios.defaults.headers && axios.defaults.headers.common) delete axios.defaults.headers.common['Authorization'];
+                delete axios.defaults.headers.common['Authorization'];
             }
 
-            // get current user (works with sanctum/session or token)
-            let me = null;
-            try {
-                const meResp = await axios.get('/user');
-                // support both shapes: {id,name,...} or {user: {...}}
-                me = meResp && meResp.data ? (meResp.data.user ? meResp.data.user : meResp.data) : null;
-            } catch (err) {
-                // fallback: try to read user from localStorage (set during API login)
-                try {
-                    const local = localStorage.getItem('user');
-                    me = local ? JSON.parse(local) : null;
-                } catch (e) {
-                    me = null;
-                }
+            // Get user; backend may return { user: {...} } or just {...}
+            const resp = await axios.get('/user');
+            const respData = resp && resp.data ? resp.data : null;
+            user = respData && respData.user ? respData.user : respData;
+            // Ensure user is an object
+            if (!user || typeof user !== 'object') {
+                throw new Error('No user data returned');
             }
-
-            if (!me || !me.id) {
-                console.warn('Cannot determine current user for fetching exams.');
-                const listEl = document.querySelector('.exam-list');
-                if (listEl) listEl.innerHTML = '<div class="exam-item">Nie je prihlásený používateľ.</div>';
-                return;
-            }
-
-            // set welcome name
+            const displayName = (user.name || user.email || 'Pacient');
             const welcomeEl = document.getElementById('welcomeName');
-            if (welcomeEl) welcomeEl.innerText = me.name || me.email || 'Pacient';
-
-            const res = await axios.get(`/patients/${me.id}/examinations`);
-            const exams = res && res.data ? res.data : [];
-            const list = document.querySelector('.exam-list');
-            if (!list) return;
+            if (welcomeEl) welcomeEl.innerText = displayName;
+        } catch (err) {
+            console.warn('Could not load user data:', err);
+            const welcomeEl = document.getElementById('welcomeName');
+            if (welcomeEl) welcomeEl.innerText = 'Pacient';
+            document.getElementById('examList').innerHTML = '<div class="exam-item">Chyba: nie ste prihlásený.</div>';
+            return;
+        }
+        // Get exams for the user
+        try {
+            const examsResp = await axios.get(`/patients/${user.id}/examinations`);
+            const exams = examsResp && examsResp.data ? examsResp.data : [];
             if (!exams || exams.length === 0) {
-                list.innerHTML = '<div class="exam-item">Žiadne vyšetrenia.</div>';
+                document.getElementById('examList').innerHTML = '<div class="exam-item">Žiadne vyšetrenia.</div>';
                 return;
             }
-            list.innerHTML = exams.map(e => {
-                // robust date parse: convert space to T for ISO, fallback to raw
-                let date = '';
-                if (e.created_at) {
-                    try {
-                        const iso = String(e.created_at).replace(' ', 'T');
-                        const dt = new Date(iso);
-                        if (!isNaN(dt)) date = dt.toLocaleString('sk-SK', { dateStyle: 'short', timeStyle: 'short' });
-                        else date = e.created_at;
-                    } catch (ex) { date = e.created_at; }
-                }
-                const doctorName = e.doctor ? (e.doctor.name + ' ' + (e.doctor.surname || '')) : 'Neznámy';
-                const photoHtml = e.photo_url ? `<img src="${e.photo_url}" style="width:100%;height:100%;object-fit:cover;" alt="Vyšetrenie #${e.id}" />` : `<div style="width:100%;height:100%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#9ca3af">No image</div>`;
-                const viewHref = e.photo_url ? e.photo_url : '#';
+            document.getElementById('examList').innerHTML = exams.map(e => {
+                const date = e.created_at ? new Date(e.created_at.replace(' ', 'T')).toLocaleDateString('sk-SK') : '';
+                const doctorName = e.doctor ? (e.doctor.name || '') : '';
+                const doctorSurname = e.doctor ? (e.doctor.surname || '') : '';
+                const doctorFull = [doctorName, doctorSurname].filter(x => x).join(' ') || 'Neznámy';
+                let statusClass = '';
+                if (e.result === 'positive') statusClass = 'status-positive';
+                else if (e.result === 'negative') statusClass = 'status-negative';
+                else statusClass = 'status-unknown';
+                // Ensure photo_url field is safe string
+                const photoVal = e.photo_url || e.photo || '';
+                const notes = e.notes || '';
+
                 return `
                 <div class="exam-item">
-                    <div style="width:96px;height:64px;overflow:hidden;border-radius:8px;">${photoHtml}</div>
                     <div class="exam-info">
                         <div class="exam-date">${date}</div>
                         <h4 class="exam-name">Vyšetrenie #${e.id}</h4>
-                        <p class="exam-status ${e.result === 'positive' ? 'status-completed' : 'status-completed'}">${e.result ? e.result : 'N/A'}</p>
-                        <div style="font-size:0.9rem;color:#6b7280;margin-top:6px;">Doktor: ${doctorName}</div>
+                        <p class="exam-status ${statusClass}">${e.result ? e.result : 'N/A'}</p>
+                        <div style="font-size:0.9rem;color:#6b7280;margin-top:6px;">Doktor: ${doctorFull}</div>
+                        ${notes ? `<div class="exam-notes">Poznámka: ${notes}</div>` : ''}
                     </div>
-                    <a class="exam-link" href="${viewHref}" data-photo="${viewHref}" class="view-photo">Zobraziť</a>
+                    <a class="exam-link" href="#" data-photo="${photoVal}">Zobraziť</a>
                 </div>
-            `;
+                `;
             }).join('');
 
-            // attach delegated click handler to open images reliably (works on mobile)
-            document.querySelectorAll('.exam-list .exam-link').forEach(a => {
-                a.addEventListener('click', function (ev) {
-                    const url = this.getAttribute('data-photo');
-                    if (!url || url === '#') {
-                        ev.preventDefault();
-                        alert('Fotka pre toto vyšetrenie nie je dostupná.');
+            // Attach click handlers for modal (normalize different saved path shapes)
+            document.querySelectorAll('.exam-link').forEach(a => {
+                a.onclick = function(ev) {
+                    ev.preventDefault();
+                    let url = this.getAttribute('data-photo') || '';
+                    console.log('raw photo url from data attribute:', url);
+                    if (!url) {
+                        alert('Fotka nie je dostupná.');
                         return;
                     }
-                    // Open the modal with the image
-                    showImageModal(url);
-                    ev.preventDefault();
-                });
-            });
-         } catch (err) {
-             console.error('Chyba pri načítaní vyšetrení', err);
-         }
-     }
 
-     loadPatientExams();
+                    try {
+                        // Absolute external URL -> convert to same-origin path (use pathname)
+                        if (url.startsWith('http://') || url.startsWith('https://')) {
+                            const parsed = new URL(url);
+                            if (parsed.origin !== window.location.origin) {
+                                url = window.location.origin + parsed.pathname + (parsed.search || '');
+                            } else {
+                                url = parsed.href;
+                            }
+                        }
+                        // Origin-relative path (starts with '/')
+                        else if (url.startsWith('/')) {
+                            url = window.location.origin + url;
+                        }
+                        // Bare path (e.g. "photos/xxx.png" or "storage/photos/xxx.png")
+                        else {
+                            if (url.startsWith('storage/')) {
+                                url = window.location.origin + '/' + url;
+                            } else {
+                                url = window.location.origin + '/storage/' + url.replace(/^\/+/, '');
+                            }
+                        }
+
+                        showImageModal(url);
+                    } catch (err) {
+                        console.error('Error preparing image URL', err);
+                        alert('Chyba pri otváraní fotky.');
+                    }
+                };
+            });
+
+        } catch (err) {
+            console.error('Error loading exams:', err);
+            document.getElementById('examList').innerHTML = '<div class="exam-item">Chyba pri načítaní vyšetrení.</div>';
+        }
+    }
+
+    // Ensure data loads when page opens
+    loadPatientData();
 </script>
 
 </body>

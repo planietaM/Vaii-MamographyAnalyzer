@@ -14,6 +14,7 @@ Route::post('/register', [RegisteredUserController::class, 'store'])
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->name('login');
 
+// Keep logout accessible via session-based web auth so tests using actingAs() continue to work.
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
