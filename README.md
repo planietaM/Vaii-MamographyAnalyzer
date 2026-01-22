@@ -1,59 +1,230 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Mammography Analyzer
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Webová aplikácia pre správu mamografických vyšetrení. Systém umožňuje riadenie používateľov s rôznymi rolami (Admin, Doktor, Pacient), správu vyšetrení a bezpečnú autentifikáciu.
 
-## About Laravel
+## Funkcie
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Autentifikácia a autorizácia** - Prihlasovanie/odhlasovanie s rôznymi rolami
+- **Správa používateľov** - Admin môže spravovať doktorov a pacientov
+- **Lekárske kódy** - Systém lekárskych kódov pre registráciu doktorov
+- **Správa vyšetrení** - Doktori vytvárajú a spravujú mamografické vyšetrenia
+- **Dashboard** - Prehľady pre každú rolu používateľa
+- **RESTful API** - Plne funkčné API s AJAX volaniami
+- **Responzívny dizajn** - Bootstrap 5 framework
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Požiadavky
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **PHP** 8.1 alebo vyššia
+- **Composer** 2.x
+- **SQLite** (predvolené) alebo **MySQL/MariaDB**
+- **Node.js a NPM** (voliteľné, pre frontend assets)
+- Webový server (Apache/Nginx) alebo PHP built-in server
 
-## Learning Laravel
+## Inštalácia
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 1. Stiahnutie projektu
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+git clone <repository-url>
+cd mamographyAnalyzer
+```
 
-## Laravel Sponsors
+### 2. Inštalácia PHP závislostí
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+composer install
+```
 
-### Premium Partners
+### 3. Konfigurácia prostredia
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Vytvorte `.env` súbor skopírovaním `.env.example`:
 
-## Contributing
+```bash
+copy .env.example .env
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Vygenerovanie aplikačného klúča
 
-## Code of Conduct
+```bash
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 5. Konfigurácia databázy
 
-## Security Vulnerabilities
+#### Použitie SQLite (predvolené):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```env
+DB_CONNECTION=sqlite
+DB_DATABASE=C:\Users\marpl\Desktop\Mamooo\mamographyAnalyzer\database\database.sqlite
+```
 
-## License
+Vytvorte databázový súbor:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+type nul > database\database.sqlite
+```
+
+#### Použitie MySQL:
+
+V `.env` nastavte:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=mammography_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Vytvorte databázu:
+
+```sql
+CREATE DATABASE mammography_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 6. Spustenie migrácií
+
+```bash
+php artisan migrate
+```
+
+### 7. Naplnenie databázy testovacími dátami
+
+```bash
+php artisan db:seed
+```
+
+Tento príkaz vytvorí:
+- Admin používateľa
+- Testovacie lekárske kódy
+- Prípadne ďalšie testovacie dáta
+
+## Spustenie aplikácie
+
+### Vývojové prostredie
+
+Spustite Laravel development server:
+
+```bash
+php artisan serve
+```
+
+Aplikácia bude dostupná na: **http://localhost:8000**
+
+### Produkčné prostredie
+
+Pre produkciu nakonfigurujte webový server (Apache/Nginx) aby smeroval do `public/` adresára.
+
+## Prihlasovacie údaje
+
+Po spustení `php artisan db:seed` budú dostupné nasledujúce testovacie účty:
+
+### Administrátor
+- **Email**: `admin@example.com`
+- **Heslo**: `password`
+
+### Doktor
+- **Email**: `doctor@example.com`
+- **Heslo**: `password`
+
+### Pacient
+- **Email**: `patient@example.com`
+- **Heslo**: `password`
+
+## Štruktúra projektu
+
+```
+mamographyAnalyzer/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/     # Kontroléry pre API a web
+│   │   ├── Middleware/      # Custom middleware
+│   │   └── Requests/        # Form Request validácie
+│   ├── Models/              # Eloquent modely
+│   │   ├── User.php
+│   │   ├── Examination.php
+│   │   └── DoctorCode.php
+│   └── Policies/            # Authorization policies
+├── database/
+│   ├── migrations/          # Databázové migrácie
+│   └── seeders/             # Seedery pre testovanie
+├── public/
+│   ├── css/                 # Štýly
+│   ├── js/                  # JavaScript súbory (AJAX)
+│   └── images/              # Obrázky
+├── resources/
+│   └── views/               # Blade šablóny
+├── routes/
+│   ├── web.php              # Web routes
+│   ├── api.php              # API routes
+│   └── auth.php             # Autentifikačné routes
+└── scripts/                 # Helper skripty
+```
+
+## API Endpointy
+
+### Autentifikácia
+- `POST /api/login` - Prihlásenie
+- `POST /api/logout` - Odhlásenie
+- `POST /api/register` - Registrácia
+
+### Používatelia (Admin)
+- `GET /api/users` - Zoznam používateľov
+- `GET /api/users/{id}` - Detail používateľa
+- `POST /api/users` - Vytvorenie používateľa
+- `PUT /api/users/{id}` - Aktualizácia používateľa
+- `DELETE /api/users/{id}` - Vymazanie používateľa
+
+### Vyšetrenia
+- `GET /api/examinations` - Zoznam vyšetrení
+- `GET /api/examinations/{id}` - Detail vyšetrenia
+- `POST /api/examinations` - Vytvorenie vyšetrenia (Doktor)
+- `PUT /api/examinations/{id}` - Aktualizácia vyšetrenia
+- `DELETE /api/examinations/{id}` - Vymazanie vyšetrenia
+
+### Lekárske kódy (Admin)
+- `GET /api/doctor-codes` - Zoznam kódov
+- `POST /api/doctor-codes` - Vytvorenie kódu
+
+
+## Riešenie problémov
+
+### Chyby s oprávneniami
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+```
+
+### Storage a cache adresáre
+Uistite sa, že má webový server práva zápisu do:
+- `storage/`
+- `bootstrap/cache/`
+
+### SQLite databáza neexistuje
+```bash
+type nul > database\database.sqlite
+php artisan migrate:fresh --seed
+```
+
+## Bezpečnosť
+
+- Všetky heslá sú hashované pomocou bcrypt
+- CSRF ochrana na všetkých formulároch
+- Middleware autentifikácia a autorizácia
+- Policy-based prístupové práva
+- Validácia na strane servera aj klienta
+
+## Technológie
+
+- **Backend**: Laravel 10.x (PHP 8.1+)
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla JS)
+- **Styling**: Bootstrap 5
+- **Databáza**: SQLite / MySQL
+- **API**: RESTful s JSON responses
+- **Autentifikácia**: Laravel Sanctum
+
+## Licencia
+
+Tento projekt je open-source software licencovaný pod [MIT licenciou](https://opensource.org/licenses/MIT).

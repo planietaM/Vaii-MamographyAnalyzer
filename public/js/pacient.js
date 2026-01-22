@@ -13,7 +13,7 @@ function showImageModal(url) {
     const modal = document.getElementById('imageModal');
     const img = document.getElementById('imageModalImg');
     const err = document.getElementById('imageModalError');
-    if (!modal || !img || !err) return;
+    if (!modal || !img || !err) return;+
 
     if (!url) {
         img.style.display = 'none';
