@@ -4,6 +4,22 @@
 
 @section('content')
 
+@php
+    // ensure $testimonials is defined and convert to a simple array for JS
+    $testimonials = $testimonials ?? collect();
+    $testimonialsArr = $testimonials->map(function($t) {
+        return [
+            'id' => $t->id ?? null,
+            'name' => $t->name ?? '',
+            'role' => $t->role ?? '',
+            'text' => $t->text ?? '',
+            'img' => $t->avatar ?? '/images/profile1.png',
+        ];
+    })->toArray();
+
+    $first = $testimonials->first();
+@endphp
+
     {{-- HERO – nadpis + vlna --}}
     <section class="hero-blob">
         <div class="hero-heading">
@@ -46,16 +62,12 @@
 
             <div class="testimonial-main">
                 <div class="testimonial-photo">
-                    <img id="testImage" src="/images/profile1.png" alt="profil lekára">
+                    <img id="testImage" src="{{ $first ? ($first->avatar ?? '/images/profile1.png') : '/images/profile1.png' }}" alt="profil lekára">
                 </div>
                 <div class="testimonial-meta">
-                    <div id="testName" class="testimonial-name">MUDr. Ivana Lucka</div>
-                    <div id="testRole" class="testimonial-role">
-                        Primárka rádiológie, Trnava
-                    </div>
-                    <p id="testText" class="testimonial-text">
-                        „Mamografický analyzer mi pomohol rýchlo nájsť suspektné ložiská a zlepšil workflow.“
-                    </p>
+                    <div id="testName" class="testimonial-name">{{ $first ? $first->name : 'MUDr. Ivana Lucka' }}</div>
+                    <div id="testRole" class="testimonial-role">{{ $first ? $first->role : 'Primárka rádiológie, Trnava' }}</div>
+                    <p id="testText" class="testimonial-text">{{ $first ? $first->text : '„Mamografický analyzer mi pomohol rýchlo nájsť suspektné ložiská a zlepšil workflow.“' }}</p>
                 </div>
             </div>
 
@@ -74,6 +86,9 @@
             prehliadnutia.
         </p>
     </section>
+
+    {{-- INFO O MAMOGRAFII -- end --}}
+
 
     {{-- MAMMOGRAM THUMBS --}}
     <section class="thumb-section">
@@ -101,6 +116,35 @@
         </div>
     </section>
 
+
+    {{-- Webináre (inline - moved from partial) --}}
+
+    <section class="more-section webinars-section">
+        <h3>Najbližšie webináre</h3>
+
+        @if(isset($webinars) && $webinars->count())
+            <div class="more-grid more-grid--stacked">
+                @foreach($webinars as $w)
+                    <article class="more-card">
+                        <div>
+                            <h4 class="more-card-title">{{ $w->title }}</h4>
+                            <p class="more-tag">{{ $w->date->format('d.m.Y H:i') }}</p>
+                            <p class="more-card-text">{{ \Illuminate\Support\Str::limit($w->short_text, 140) }}</p>
+                            <p class="more-meta">Miesto: {{ $w->location ?? 'Miesto neuvedené' }}</p>
+                            @if($w->telephone)
+                                <p class="more-meta">Kontakt: {{ $w->telephone }}</p>
+                            @endif
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        @else
+            <div class="table-container" style="padding:1.25rem; text-align:center;">
+                <p>Nie sú žiadne webináre.</p>
+            </div>
+        @endif
+    </section>
+
     {{-- ZISTITE VIAC --}}
     <section class="more-section" style="padding-bottom: 60px;">
         <h3>Zistite viac</h3>
@@ -126,7 +170,7 @@
                     <div class="more-tag">Výskum</div>
                     <h4 class="more-card-title">AI v mamografii</h4>
                     <p class="more-card-text">
-                        Popis výskumu, publikácie alebo článku o tom, ako AI zlepšuje citlivosť a
+                        Popis výskumu, publikácie alebo čl��nku o tom, ako AI zlepšuje citlivosť a
                         znižuje počet zbytočných vyšetrení.
                     </p>
                 </div>
@@ -158,20 +202,7 @@
 
 @section('scripts')
     <script>
-        const testimonials = [
-            {
-                name: 'MUDr. Ivana Lucka',
-                role: 'Primárka rádiológie, Trnava',
-                text: '„Mamografický analyzer mi pomohol rýchlo nájsť suspektné ložiská a zlepšil workflow.“',
-                img: '/images/profile1.png'
-            },
-            {
-                name: 'MUDr. Peter Horváth',
-                role: 'Rádiológ, Bratislava',
-                text: '„Presnosť a rýchlosť pomáhajú v rutinnom skríningu a šetria čas celému tímu.“',
-                img: '/images/profile2.png'
-            }
-        ];
+        const testimonials = @json($testimonialsArr);
 
         let idx = 0;
         const imgEl  = document.getElementById('testImage');
@@ -180,23 +211,26 @@
         const textEl = document.getElementById('testText');
 
         function renderTest(i) {
+            if (!testimonials || !testimonials.length) return;
             const t = testimonials[i];
-            imgEl.src = t.img;
-            nameEl.textContent = t.name;
-            roleEl.textContent = t.role;
-            textEl.textContent = t.text;
+            if (imgEl) imgEl.src = t.img || '/images/profile1.png';
+            if (nameEl) nameEl.textContent = t.name || '';
+            if (roleEl) roleEl.textContent = t.role || '';
+            if (textEl) textEl.textContent = t.text || '';
         }
 
-        document.getElementById('prevTest').addEventListener('click', () => {
+        document.getElementById('prevTest')?.addEventListener('click', () => {
+            if (!testimonials.length) return;
             idx = (idx - 1 + testimonials.length) % testimonials.length;
             renderTest(idx);
         });
 
-        document.getElementById('nextTest').addEventListener('click', () => {
+        document.getElementById('nextTest')?.addEventListener('click', () => {
+            if (!testimonials.length) return;
             idx = (idx + 1) % testimonials.length;
             renderTest(idx);
         });
 
-        renderTest(0);
+        if (testimonials.length) renderTest(0);
     </script>
 @endsection

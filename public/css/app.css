@@ -545,6 +545,43 @@ header {
     transform: translateY(1px);
 }
 
+/* stacked variant for card grids (one per row) */
+.more-grid--stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem; /* larger gap between stacked items to separate cards visually */
+}
+
+.more-grid--stacked .more-card {
+    width: 100%;
+    max-width: none; /* allow full width inside container */
+}
+
+/* compact spacing for webinars: tighten vertical spacing inside each card */
+.webinars-section .more-card {
+    padding: 0.85rem 1rem; /* tighter padding */
+    gap: 0.35rem; /* reduce spacing between items inside the card */
+}
+
+.webinars-section .more-card .more-card-title {
+    margin-bottom: 0.12rem; /* very small space under title */
+}
+
+.webinars-section .more-card .more-tag {
+    margin-bottom: 0.2rem;
+}
+
+.webinars-section .more-card p {
+    margin: 0.12rem 0; /* tighter vertical gap between paragraphs */
+    line-height: 1.2; /* tighter line-height for compact look */
+}
+
+@media (min-width: 900px) {
+    .more-grid--stacked {
+        gap: 2rem;
+    }
+}
+
 /* mobil / vysoký zoom – zmenším fonty a paddingy,
    aby to nevyzeralo „roztreštene“ na mini šírke */
 @media (max-width: 768px) {
@@ -584,4 +621,118 @@ header {
     .more-card-text {
         font-size: 0.88rem;
     }
+}
+
+/* =========================================
+   SECTIONS & TABLES (shared between home and admin)
+   ========================================= */
+.section {
+    margin-bottom: 3rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111827;
+}
+
+.btn-add {
+    background: #c026d3;
+    color: #fff;
+    padding: 0.65rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-add:hover {
+    background: #a21caf;
+    transform: translateY(-2px);
+}
+
+.table-container {
+    background: #fff;
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f9fafb;
+}
+
+th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+td {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #f3f4f6;
+    font-size: 0.95rem;
+}
+
+tbody tr {
+    transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    padding: 0.45rem 0.9rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-view { background: #f3f4f6; color: #374151; }
+.btn-edit { background: #dbeafe; color: #1e40af; }
+.btn-delete { background: #fee2e2; color: #991b1b; }
+
+/* Responsive tweaks for tables & sections */
+@media (max-width: 900px) {
+    .section-header { flex-direction: column; align-items: flex-start; }
+    .btn-add { width: 100%; justify-content: center; }
+    th, td { padding: 0.75rem 1rem; font-size: 0.875rem; }
+    .table-actions { flex-direction: column; }
+    .btn-action { width: 100%; }
 }

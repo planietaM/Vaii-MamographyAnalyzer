@@ -1,59 +1,102 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Mamography Analyzer
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Krátky popis
 
-## About Laravel
+Tento projekt je jednoduché webové demo pre "Mamography Analyzer" — nástroj na podporu mamografického skríningu s admin rozhraním na správu doktorov (testimonialov) a webinárov.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Hlavné funkcie
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Správa používateľov (doktor, pacient, admin) cez admin dashboard.
+- CRUD webinárov (názov, stručný text, dátum, miesto, telefón) — bez obrázkov.
+- CRUD testimonialov / doktorov (meno, rola, text, nahratie fotky z PC). Fotky sa ukladajú do DB ako `image_data` (data URL).
+- Jednoduchá stránka s úvodom a sekciou "Najbližšie webináre" a karuselom testimonialov.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Rýchle inštrukcie na spustenie (lokálne)
 
-## Learning Laravel
+Požiadavky
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PHP 8+ (alebo verzia ktorá používa projekt)
+- Composer
+- sqlite3 (projekt používa sqlite v repozitári ako jednoduché DB) — ak nepoužívate sqlite, upravte `.env`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Inštalácia závislostí
 
-## Laravel Sponsors
+```powershell
+cd C:\Users\marpl\Desktop\Mamooo\mamographyAnalyzer
+composer install
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Vytvorenie env (ak chýba)
 
-### Premium Partners
+```powershell
+copy .env.example .env
+php artisan key:generate
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+DB (SQLite) — ak používate sqlite: skontrolujte `database/database.sqlite` alebo vytvorte nový súbor.
 
-## Contributing
+Migrácie a seedery
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Aplikujte migrácie a seedery (v prostredí vývoja):
 
-## Code of Conduct
+```powershell
+php artisan migrate --force
+php artisan db:seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Poznámka: počas vývoja som pridal/a niekoľko migrácií:
+- Pridané `image_data` pre `testimonials` (ukladanie base64 data-URI).
+- Odstránené textové pole `image` (cesta) z `testimonials`.
+- Odstránené obrázkové polia z `webinars` (webináre už nemajú obrázky).
+- Nakoniec som odstránil stĺpec `active` z `testimonials` (UI ho už nepoužíva).
 
-## Security Vulnerabilities
+Ak potrebujete vrátiť migrácie späť (rollback):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```powershell
+php artisan migrate:rollback --step=1
+```
 
-## License
+Spustenie lokálneho vývoja
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```powershell
+php artisan serve
+# otvoríte http://127.0.0.1:8000 alebo adresu, ktorú servíruje artisan
+```
+
+Admin dashboard
+
+- Prihláste sa ako admin (ak seed vytvorí admin používateľa) alebo vytvorte používateľa s rolou `admin`.
+- Otvorte `/dashboard` — tam je sekcia `Testimonialy / Doktori` a `Webináre`.
+- Testimonial modal umožňuje nahratie fotky (input `type=file`). Obrázok sa uloží do DB ako base64 `image_data` a hneď sa zobrazí v tabuľke.
+
+Poznámky k tomu, ako som upravil správanie testimonialov:
+
+- UI už neprijíma textovú cestu k obrázku (pole `image` bolo odstránené). Nahrávajte obrázky cez file input.
+- Ak chcete nahrávať obrázky namiesto ukladania do DB (odporúča sa pri veľkých súboroch), môžem presunúť ukladanie do `storage/app/public` a ukladať len cestu v DB.
+
+Frontend / AJAX
+
+- Admin šablóna obsahuje JS, ktorý používa `axios` na CRUD volania pre `webinars` a `testimonials`.
+- Na admin stránke som pridal server-side fallback: testimonialy sa vykreslia priamo z Blade (ak sú v premennej `$testimonials`), takže aj keď AJAX zlyhá, uvidíte údaje z DB.
+
+Testovanie
+
+- Rýchla kontrola v tinker (príklady):
+
+```powershell
+php artisan tinker --execute "print_r(\DB::table('testimonials')->first());"
+```
+
+Často kladené otázky / tipy
+
+- Prečo sú obrázky uložené ako base64 v DB? — Je to rýchle riešenie počas vývoja. Pre produkciu odporúčam uložiť súbory na disk a v DB ukladať len cestu.
+- Ako pridať nový webinár? — Admin dashboard → Webináre → Pridať webinár.
+- Ako zmeniť zobrazovanie testimonialov na homepage? — `resources/views/home.blade.php` zobrazuje testimonialy podľa `Testimonial::orderBy('position')`.
+
+Kontakt
+
+Ak chceš ďalšie zlepšenia (preview obrázku pri nahrávaní, presun ukladania obrázkov na disk, vylepšenie štýlov), napíš, čo preferuješ a implementujem to.
+
+---
+
+Malé zhrnutie: upravil/a som admin UI tak, aby testimonialy boli čerpané z DB a aby sa nahrávala fotka cez file input; taktiež som urobil/a migrácie na odstránenie starých polí (image, active) a pridal/a pole `image_data` pre bezpečné zobrazovanie uploadov.

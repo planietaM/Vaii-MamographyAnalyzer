@@ -7,7 +7,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 
 Route::get('/', function () {
-    return view('home');
+    $webinars = \App\Models\Webinar::where('date', '>=', now())->orderBy('date', 'asc')->get();
+    // `active` column removed; return all testimonial records ordered by position
+    $testimonials = \App\Models\Testimonial::orderBy('position')->get();
+    return view('home', ['webinars' => $webinars, 'testimonials' => $testimonials]);
 })->name('home');
 
 Route::get('/o-nas', function () {
@@ -65,6 +68,9 @@ Route::get('/dashboard', function () {
             return $patient;
         });
 
+        // also load testimonials for admin view server-side so admin table has initial rows
+        $testimonials = \App\Models\Testimonial::orderBy('position')->get();
+
         return view('admin', [
             'doctorsCount' => $doctorsCount,
             'patientsCount' => $patientsCount,
@@ -72,6 +78,7 @@ Route::get('/dashboard', function () {
             'todayCount' => $todayCount,
             'doctors' => $doctors,
             'patients' => $patients,
+            'testimonials' => $testimonials,
         ]);
     }
 
@@ -99,6 +106,23 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // web endpoints for listing examinations (session-authenticated)
     Route::get('patients/{patient}/examinations', [App\Http\Controllers\ExaminationController::class, 'indexForPatient'])->name('admin.patients.examinations.index');
     Route::get('doctors/{doctor}/examinations', [App\Http\Controllers\ExaminationController::class, 'indexForDoctor'])->name('admin.doctors.examinations.index');
+
+    // Webinars admin CRUD (JSON endpoints used by admin UI)
+    Route::get('webinars', [App\Http\Controllers\WebinarController::class, 'index'])->name('admin.webinars.index');
+    Route::post('webinars', [App\Http\Controllers\WebinarController::class, 'store'])->name('admin.webinars.store');
+    Route::get('webinars/{webinar}', [App\Http\Controllers\WebinarController::class, 'show'])->name('admin.webinars.show');
+    Route::put('webinars/{webinar}', [App\Http\Controllers\WebinarController::class, 'update'])->name('admin.webinars.update');
+    Route::delete('webinars/{webinar}', [App\Http\Controllers\WebinarController::class, 'destroy'])->name('admin.webinars.destroy');
+
+    // Testimonials admin CRUD
+    Route::get('testimonials', [App\Http\Controllers\TestimonialController::class, 'index'])->name('admin.testimonials.index');
+    Route::post('testimonials', [App\Http\Controllers\TestimonialController::class, 'store'])->name('admin.testimonials.store');
+    Route::get('testimonials/{testimonial}', [App\Http\Controllers\TestimonialController::class, 'show'])->name('admin.testimonials.show');
+    Route::put('testimonials/{testimonial}', [App\Http\Controllers\TestimonialController::class, 'update'])->name('admin.testimonials.update');
+    Route::delete('testimonials/{testimonial}', [App\Http\Controllers\TestimonialController::class, 'destroy'])->name('admin.testimonials.destroy');
+
+    // keep compatibility: redirect old manage-webinars route to dashboard (section Webináre)
+    Route::redirect('manage-webinars', '/dashboard')->name('admin.webinars.manage');
 });
 
 // Fallback web login route (non-AJAX) — helps when API/Axios fails

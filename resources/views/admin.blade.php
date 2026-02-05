@@ -544,6 +544,52 @@
     </div>
 </div>
 
+<!-- Webinar modal -->
+<div id="webinarModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; padding:1.25rem; border-radius:8px; width:600px; max-width:95%;">
+        <h3 id="webinarModalTitle">Pridať / Upraviť webinár</h3>
+        <form id="webinarForm">
+            <input type="hidden" id="webinarId" name="id" />
+            <div style="display:flex; gap:8px; margin-bottom:8px; flex-direction:column;">
+                <input placeholder="Názov" name="title" id="webinarTitle" style="padding:8px;" required />
+                <textarea placeholder="Stručný text" name="short_text" id="webinarShortText" style="padding:8px; min-height:80px; margin-top:8px;" required></textarea>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <input type="datetime-local" name="date" id="webinarDate" style="flex:1; padding:8px;" required />
+                    <input placeholder="Miesto" name="location" id="webinarLocation" style="flex:1; padding:8px;" />
+                </div>
+                <input placeholder="Tel. kontakt" name="telephone" id="webinarTelephone" style="padding:8px; margin-top:8px;" />
+                <!-- image upload removed for webinars per request -->
+            </div>
+
+            <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+                <button type="button" onclick="closeWebinarModal()" style="padding:8px 12px;">Zrušiť</button>
+                <button id="saveWebinarBtn" type="button" onclick="saveWebinar()" style="background:#9c0b8e;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Uložiť</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Testimonial modal -->
+<div id="testimonialModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; padding:1rem; border-radius:8px; width:560px; max-width:95%;">
+        <h3 id="testimonialModalTitle">Pridať / Upraviť doktora</h3>
+        <form id="testimonialForm">
+            <input type="hidden" id="testimonialId" name="id" />
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <input placeholder="Meno" name="name" id="testimonialName" style="padding:8px;" required />
+                <input placeholder="Rola (napr. Primárka rádiológie, Trnava)" name="role" id="testimonialRole" style="padding:8px;" />
+                <textarea placeholder="Text / citát" name="text" id="testimonialText" style="padding:8px; min-height:80px;"></textarea>
+                <input type="file" accept="image/*" id="testimonialImageFile" name="image_file" style="padding:8px;" />
+            </div>
+
+            <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+                <button type="button" onclick="closeTestimonialModal()" style="padding:8px 12px;">Zrušiť</button>
+                <button id="saveTestimonialBtn" type="button" onclick="saveTestimonial()" style="background:#9c0b8e;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Uložiť</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="container">
     <section class="admin-dashboard">
 
@@ -675,6 +721,77 @@
                             <td colspan="9">Žiadni pacienti.</td>
                         </tr>
                         @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Webináre</h2>
+                <button class="btn-add" onclick="openWebinarModal()">Pridať webinár</button>
+            </div>
+
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table id="webinarsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Názov</th>
+                                <th>Dátum</th>
+                                <th>Miesto</th>
+                                <th>Tel.</th>
+                                <th>Zobraziť</th>
+                                <th>Upraviť</th>
+                                <th>Vymazať</th>
+                            </tr>
+                        </thead>
+                        <tbody id="webinarTbody">
+                            <tr><td colspan="6">Načítavam...</td></tr>
+                        </tbody>
+                     </table>
+                 </div>
+             </div>
+         </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Testimonialy / Doktori</h2>
+                <button class="btn-add" onclick="openTestimonialModal()">Pridať doktora</button>
+            </div>
+
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table id="testimonialsTable">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Obr.</th>
+                            <th>Meno</th>
+                            <th>Rola</th>
+                            <th>Zobraziť</th>
+                            <th>Upraviť</th>
+                            <th>Vymazať</th>
+                        </tr>
+                        </thead>
+                        <tbody id="testimonialTbody">
+                            @if(isset($testimonials) && $testimonials->count())
+                                @foreach($testimonials as $t)
+                                    <tr>
+                                        <td>{{ $t->id }}</td>
+                                        <td><img src="{{ $t->image_data ?? '/images/profile1.png' }}" style="width:48px;height:48px;border-radius:999px;object-fit:cover" alt="avatar"></td>
+                                        <td>{{ $t->name }}</td>
+                                        <td>{{ $t->role ?? '-' }}</td>
+                                        <td><button class="btn-action btn-view" onclick='openTestimonialModalWithData(@json(['id'=>$t->id,'name'=>$t->name,'role'=>$t->role,'text'=>$t->text]), "view")'>Zobraziť</button></td>
+                                        <td><button class="btn-action btn-edit" onclick='openTestimonialModalWithData(@json(['id'=>$t->id,'name'=>$t->name,'role'=>$t->role,'text'=>$t->text]), "edit")'>Upraviť</button></td>
+                                        <td><button class="btn-action btn-delete" onclick="deleteTestimonial({{ $t->id }})">Vymazať</button></td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr><td colspan="7">Načítavam...</td></tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
@@ -838,7 +955,285 @@
             console.error('Chyba pri nahrávaní vyšetrenia', err);
             alert('Chyba pri nahrávaní vyšetrenia');
         }
-    });
+    }
+
+    // Webinars admin JS (CRUD)
+    async function fetchWebinars() {
+        try {
+            const res = await axios.get('/admin/webinars');
+            const list = res.data || [];
+            const tbody = document.getElementById('webinarTbody');
+            if (!list.length) {
+                tbody.innerHTML = '<tr><td colspan="7">Žiadne webináre.</td></tr>';
+                return;
+            }
+            const rows = list.map(w => `
+                <tr>
+                    <td>${w.id}</td>
+                    <td>${escapeHtml(w.title)}</td>
+                    <td>${w.date ? new Date(w.date).toLocaleString() : '-'}</td>
+                    <td>${escapeHtml(w.location || '-')}</td>
+                    <td>${escapeHtml(w.telephone || '-')}</td>
+                    <td > <button class="btn-action btn-view" onclick='viewWebinar(${w.id})'>Zobraziť</button> </td>
+                    <td><button class="btn-action btn-edit" onclick='editWebinar(${w.id})'>Upraviť</button></td>
+                    <td><button class="btn-action btn-delete" onclick='deleteWebinar(${w.id})'>Vymazať</button></td>
+                </tr>`).join('');
+            tbody.innerHTML = rows;
+        } catch (err) {
+            console.error('Chyba pri načítaní webinárov', err);
+            const tbody = document.getElementById('webinarTbody');
+            tbody.innerHTML = '<tr><td colspan="6">Chyba pri načítaní.</td></tr>';
+        }
+    }
+
+    function openWebinarModal() {
+        document.getElementById('webinarForm').reset();
+        document.getElementById('webinarId').value = '';
+        document.getElementById('webinarModalTitle').innerText = 'Pridať webinár';
+        document.getElementById('webinarModal').style.display = 'flex';
+    }
+
+    function closeWebinarModal() {
+        document.getElementById('webinarModal').style.display = 'none';
+    }
+
+    async function saveWebinar() {
+        const id = document.getElementById('webinarId').value;
+        const v = document.getElementById('webinarDate').value;
+        const payload = {
+            title: document.getElementById('webinarTitle').value,
+            short_text: document.getElementById('webinarShortText').value,
+            date: v ? new Date(v).toISOString() : null,
+            location: document.getElementById('webinarLocation').value,
+            telephone: document.getElementById('webinarTelephone').value,
+        };
+
+        try {
+            if (id) {
+                await axios.put(`/admin/webinars/${id}`, payload);
+                alert('Webinár aktualizovaný');
+            } else {
+                await axios.post('/admin/webinars', payload);
+                alert('Webinár vytvorený');
+            }
+            closeWebinarModal();
+            fetchWebinars();
+        } catch (err) {
+            alert('Chyba pri uložení: ' + (err.response?.data?.message || err.message));
+            console.error(err);
+        }
+    }
+
+    function viewWebinar(id) {
+        // show read-only in the modal
+        axios.get(`/admin/webinars/${id}`).then(res => {
+            const w = res.data;
+            document.getElementById('webinarId').value = w.id;
+            document.getElementById('webinarTitle').value = w.title;
+            document.getElementById('webinarShortText').value = w.short_text;
+            // fill datetime-local value from ISO
+            if (w.date) {
+                const dt = new Date(w.date);
+                // format to yyyy-MM-ddTHH:mm
+                const pad = n => n.toString().padStart(2,'0');
+                const local = dt.getFullYear() + '-' + pad(dt.getMonth()+1) + '-' + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+                document.getElementById('webinarDate').value = local;
+            }
+            document.getElementById('webinarLocation').value = w.location || '';
+            document.getElementById('webinarTelephone').value = w.telephone || '';
+            document.getElementById('webinarModalTitle').innerText = 'Zobraziť webinár';
+            // disable inputs
+            ['webinarTitle','webinarShortText','webinarDate','webinarLocation','webinarTelephone'].forEach(id => document.getElementById(id).setAttribute('disabled','disabled'));
+            document.getElementById('saveWebinarBtn').style.display = 'none';
+            document.getElementById('webinarModal').style.display = 'flex';
+        }).catch(err => { alert('Chyba pri načítaní webináru'); console.error(err); });
+    }
+
+    async function editWebinar(id) {
+        try {
+            const res = await axios.get(`/admin/webinars/${id}`);
+            const w = res.data;
+            document.getElementById('webinarId').value = w.id;
+            document.getElementById('webinarTitle').value = w.title;
+            document.getElementById('webinarShortText').value = w.short_text;
+            if (w.date) {
+                const dt = new Date(w.date);
+                const pad = n => n.toString().padStart(2,'0');
+                const local = dt.getFullYear() + '-' + pad(dt.getMonth()+1) + '-' + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+                document.getElementById('webinarDate').value = local;
+            }
+            document.getElementById('webinarLocation').value = w.location || '';
+            document.getElementById('webinarTelephone').value = w.telephone || '';
+            // enable inputs
+            ['webinarTitle','webinarShortText','webinarDate','webinarLocation','webinarTelephone'].forEach(id => document.getElementById(id).removeAttribute('disabled'));
+            document.getElementById('saveWebinarBtn').style.display = 'inline-block';
+            document.getElementById('webinarModalTitle').innerText = 'Upraviť webinár';
+            document.getElementById('webinarModal').style.display = 'flex';
+        } catch (err) {
+            alert('Chyba pri načítaní pre editáciu');
+            console.error(err);
+        }
+    }
+
+    async function deleteWebinar(id) {
+        if (!confirm('Naozaj chcete webinár vymazať?')) return;
+        try {
+            await axios.delete(`/admin/webinars/${id}`);
+            alert('Webinár vymazaný');
+            fetchWebinars();
+        } catch (err) {
+            alert('Chyba pri mazaní: ' + (err.response?.data?.message || err.message));
+            console.error(err);
+        }
+    }
+
+    // Testimonials admin JS (CRUD)
+    async function fetchTestimonials() {
+        try {
+            const res = await axios.get('/admin/testimonials');
+            const list = res.data || [];
+            const tbody = document.getElementById('testimonialTbody');
+            if (!list.length) {
+                tbody.innerHTML = '<tr><td colspan="8">Žiadni doktori/testimonialy.</td></tr>';
+                return;
+            }
+            const rows = list.map(t => `
+                <tr>
+                    <td>${t.id}</td>
+                    <td><img src="${t.image_data || '/images/profile1.png'}" style="width:48px;height:48px;border-radius:999px;object-fit:cover" alt="avatar"></td>
+                    <td>${escapeHtml(t.name)}</td>
+                    <td>${escapeHtml(t.role || '-')}</td>
+                    <td><button class="btn-action btn-view" onclick='viewTestimonial(${t.id})'>Zobraziť</button></td>
+                    <td><button class="btn-action btn-edit" onclick='editTestimonial(${t.id})'>Upraviť</button></td>
+                    <td><button class="btn-action btn-delete" onclick='deleteTestimonial(${t.id})'>Vymazať</button></td>
+                </tr>`).join('');
+            tbody.innerHTML = rows;
+        } catch (err) {
+            console.error('Chyba pri načítaní testimonialov', err);
+            document.getElementById('testimonialTbody').innerHTML = '<tr><td colspan="7">Chyba pri načítaní.</td></tr>';
+        }
+    }
+
+    function openTestimonialModal() {
+        document.getElementById('testimonialForm').reset();
+        document.getElementById('testimonialId').value = '';
+        document.getElementById('testimonialModalTitle').innerText = 'Pridať doktora';
+        document.getElementById('testimonialModal').style.display = 'flex';
+    }
+
+    function closeTestimonialModal() {
+        document.getElementById('testimonialModal').style.display = 'none';
+    }
+
+    async function saveTestimonial() {
+        const id = document.getElementById('testimonialId').value;
+        const form = new FormData();
+        form.append('name', document.getElementById('testimonialName').value);
+        form.append('role', document.getElementById('testimonialRole').value);
+        form.append('text', document.getElementById('testimonialText').value);
+        const fileInput = document.getElementById('testimonialImageFile');
+        if (fileInput && fileInput.files && fileInput.files.length) {
+            form.append('image_file', fileInput.files[0]);
+        }
+
+        form.append('position', 0);
+        // active flag removed
+
+        try {
+            if (id) {
+                await axios.post(`/admin/testimonials/${id}?_method=PUT`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+                alert('Doktor aktualizovaný');
+            } else {
+                await axios.post('/admin/testimonials', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+                alert('Doktor vytvorený');
+            }
+            closeTestimonialModal();
+            fetchTestimonials();
+        } catch (err) {
+            alert('Chyba pri uložení: ' + (err.response?.data?.message || err.message));
+            console.error(err);
+        }
+    }
+
+    async function viewTestimonial(id) {
+        try {
+            const res = await axios.get(`/admin/testimonials/${id}`);
+            const t = res.data;
+            document.getElementById('testimonialId').value = t.id;
+            document.getElementById('testimonialName').value = t.name;
+            document.getElementById('testimonialRole').value = t.role || '';
+            document.getElementById('testimonialText').value = t.text || '';
+            // image path removed; rely on uploaded image_data
+             document.getElementById('testimonialModalTitle').innerText = 'Zobraziť doktora';
+            ['testimonialName','testimonialRole','testimonialText'].forEach(id => document.getElementById(id).setAttribute('disabled','disabled'));
+             document.getElementById('saveTestimonialBtn').style.display = 'none';
+             document.getElementById('testimonialModal').style.display = 'flex';
+        } catch (err) {
+            alert('Chyba pri načítaní');
+        }
+    }
+
+    async function editTestimonial(id) {
+        try {
+            const res = await axios.get(`/admin/testimonials/${id}`);
+            const t = res.data;
+            document.getElementById('testimonialId').value = t.id;
+            document.getElementById('testimonialName').value = t.name;
+            document.getElementById('testimonialRole').value = t.role || '';
+            document.getElementById('testimonialText').value = t.text || '';
+            // image path removed; file upload input remains empty for choosing a new file
+            ['testimonialName','testimonialRole','testimonialText'].forEach(id => document.getElementById(id).removeAttribute('disabled'));
+             document.getElementById('saveTestimonialBtn').style.display = 'inline-block';
+             document.getElementById('testimonialModalTitle').innerText = 'Upraviť doktora';
+             document.getElementById('testimonialModal').style.display = 'flex';
+        } catch (err) {
+            alert('Chyba pri načítaní pre edit');
+        }
+    }
+
+    async function deleteTestimonial(id) {
+        if (!confirm('Naozaj chcete vymazať?')) return;
+        try {
+            await axios.delete(`/admin/testimonials/${id}`);
+            alert('Vymazané');
+            fetchTestimonials();
+        } catch (err) {
+            alert('Chyba pri mazaní');
+        }
+    }
+
+    // small helper to avoid XSS in table
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/[&<>\"]/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','\\': '\\\\','"':'&quot;'}[c]; });
+    }
+
+    // Populate testimonial modal from server-rendered row data (no AJAX).
+    function openTestimonialModalWithData(data, mode = 'edit') {
+        if (!data) return;
+        document.getElementById('testimonialForm').reset();
+        document.getElementById('testimonialId').value = data.id || '';
+        document.getElementById('testimonialName').value = data.name || '';
+        document.getElementById('testimonialRole').value = data.role || '';
+        document.getElementById('testimonialText').value = data.text || '';
+
+        const saveBtn = document.getElementById('saveTestimonialBtn');
+        if (mode === 'view') {
+            ['testimonialName','testimonialRole','testimonialText'].forEach(id => document.getElementById(id).setAttribute('disabled','disabled'));
+            if (saveBtn) saveBtn.style.display = 'none';
+            document.getElementById('testimonialModalTitle').innerText = 'Zobraziť doktora';
+        } else {
+            ['testimonialName','testimonialRole','testimonialText'].forEach(id => document.getElementById(id).removeAttribute('disabled'));
+            if (saveBtn) saveBtn.style.display = 'inline-block';
+            document.getElementById('testimonialModalTitle').innerText = 'Upraviť doktora';
+        }
+
+        document.getElementById('testimonialModal').style.display = 'flex';
+    }
+
+    // fetch initially
+    fetchWebinars();
+    fetchTestimonials();
 </script>
 
 <script src="/js/admin.js"></script>
