@@ -784,8 +784,16 @@
                                         <td><img src="{{ $t->image_data ?? '/images/profile1.png' }}" style="width:48px;height:48px;border-radius:999px;object-fit:cover" alt="avatar"></td>
                                         <td>{{ $t->name }}</td>
                                         <td>{{ $t->role ?? '-' }}</td>
-                                        <td><button class="btn-action btn-view" onclick='openTestimonialModalWithData(@json(['id'=>$t->id,'name'=>$t->name,'role'=>$t->role,'text'=>$t->text]), "view")'>Zobraziť</button></td>
-                                        <td><button class="btn-action btn-edit" onclick='openTestimonialModalWithData(@json(['id'=>$t->id,'name'=>$t->name,'role'=>$t->role,'text'=>$t->text]), "edit")'>Upraviť</button></td>
+                                        <td>
+                                            <button class="btn-action btn-view"
+                                                data-testimonial="{{ base64_encode(json_encode($t->only(['id','name','role','text']))) }}"
+                                                onclick="openTestimonialModalWithData(JSON.parse(atob(this.dataset.testimonial)), 'view')">Zobraziť</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn-action btn-edit"
+                                                data-testimonial="{{ base64_encode(json_encode($t->only(['id','name','role','text']))) }}"
+                                                onclick="openTestimonialModalWithData(JSON.parse(atob(this.dataset.testimonial)), 'edit')">Upraviť</button>
+                                        </td>
                                         <td><button class="btn-action btn-delete" onclick="deleteTestimonial({{ $t->id }})">Vymazať</button></td>
                                     </tr>
                                 @endforeach
