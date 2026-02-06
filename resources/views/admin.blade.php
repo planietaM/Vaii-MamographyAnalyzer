@@ -402,6 +402,74 @@
             box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.1);
         }
 
+        /* Modal dialog (shared styles for admin modals, matches doctor's view) */
+        .modal-dialog {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-content-box {
+            background: #fff;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            width: 520px;
+            max-width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 32px rgba(15,23,42,0.12);
+        }
+
+        .modal-close {
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            background: #fff;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* image preview modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .modal-image {
+            display: block;
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .modal-error {
+            display: none;
+            color: #fff;
+            text-align: center;
+            padding: 2rem 1rem 1rem 1rem;
+            font-size: 1.2rem;
+        }
+
         /* Mobile */
         @media (max-width: 768px) {
             header {
@@ -494,61 +562,61 @@
 </section>
 
 <!-- User modal -->
-<div id="userModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
-    <div style="background:#fff; padding:1.25rem; border-radius:8px; width:520px; max-width:95%;">
-        <h3 id="modalTitle">Uprav používateľa</h3>
-        <form id="userForm">
-            <input type="hidden" name="id" id="userId" />
-            <div style="display:flex; gap:8px; margin-bottom:8px;">
-                <input placeholder="Meno" name="name" id="userName" style="flex:1; padding:8px;" />
-                <input placeholder="Priezvisko" name="surname" id="userSurname" style="flex:1; padding:8px;" />
-            </div>
-            <div style="display:flex; gap:8px; margin-bottom:8px;">
-                <input placeholder="Email" name="email" id="userEmail" style="flex:1; padding:8px;" />
-                <input placeholder="Telefón" name="phone" id="userPhone" style="flex:1; padding:8px;" />
-            </div>
-            <div style="display:flex; gap:8px; margin-bottom:8px;">
+<div id="userModal" class="modal-dialog">
+    <div class="modal-content-box">
+         <h3 id="modalTitle">Uprav používateľa</h3>
+         <form id="userForm">
+             <input type="hidden" name="id" id="userId" />
+             <div style="display:flex; gap:8px; margin-bottom:8px;">
+                 <input placeholder="Meno" name="name" id="userName" style="flex:1; padding:8px;" />
+                 <input placeholder="Priezvisko" name="surname" id="userSurname" style="flex:1; padding:8px;" />
+             </div>
+             <div style="display:flex; gap:8px; margin-bottom:8px;">
+                 <input placeholder="Email" name="email" id="userEmail" style="flex:1; padding:8px;" />
+                 <input placeholder="Telefón" name="phone" id="userPhone" style="flex:1; padding:8px;" />
+             </div>
+             <div style="display:flex; gap:8px; margin-bottom:8px;">
                 <select id="userRole" name="role" style="flex:1; padding:8px;">
                     <option value="patient">Pacient</option>
                     <option value="doctor">Doktor</option>
                     <option value="admin">Admin</option>
                 </select>
-            </div>
+             </div>
 
             <div style="display:flex; gap:8px; justify-content:flex-end;">
                 <button type="button" onclick="closeUserModal()" style="padding:8px 12px;">Zrušiť</button>
                 <button id="saveUserBtn" type="button" onclick="saveUser()" style="background:#9c0b8e;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Uložiť</button>
             </div>
-        </form>
-    </div>
-</div>
+         </form>
+     </div>
+ </div>
 
 <!-- Examination upload modal -->
-<div id="examModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
-    <div style="background:#fff; padding:1rem; border-radius:8px; width:520px; max-width:95%;">
-        <h3 id="examModalTitle">Nahraj vyšetrenie</h3>
-        <form id="examForm">
-            <input type="hidden" id="examPatientId" />
-            <div style="display:flex; gap:8px; margin-bottom:8px;">
-                <input type="file" accept="image/*" id="examPhoto" style="flex:1; padding:8px;" />
-            </div>
-            <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
+<div id="examModal" class="modal-dialog">
+    <div class="modal-content-box">
+         <h3 id="examModalTitle">Nahraj vyšetrenie</h3>
+         <form id="examForm">
+             <input type="hidden" id="examPatientId" />
+             <div style="display:flex; gap:8px; margin-bottom:8px;">
+                 <input type="file" accept="image/*" id="examPhoto" style="flex:1; padding:8px;" />
+             </div>
+             <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
                 <label><input type="radio" name="result" value="negative" checked /> Negatívny</label>
                 <label><input type="radio" name="result" value="positive" /> Pozitívny</label>
-            </div>
+             </div>
             <div style="display:flex; gap:8px; justify-content:flex-end;">
                 <button type="button" onclick="closeExamModal()" style="padding:8px 12px;">Zrušiť</button>
                 <button id="uploadExamBtn" type="button" onclick="uploadExam()" style="background:#9c0b8e;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Nahrať</button>
             </div>
-        </form>
-    </div>
-</div>
+         </form>
+     </div>
+ </div>
 
 <!-- Webinar modal -->
-<div id="webinarModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
-    <div style="background:#fff; padding:1.25rem; border-radius:8px; width:600px; max-width:95%;">
-        <h3 id="webinarModalTitle">Pridať / Upraviť webinár</h3>
-        <form id="webinarForm">
+<div id="webinarModal" class="modal-dialog">
+    <div class="modal-content-box" style="max-width:600px; width:95%;">
+         <h3 id="webinarModalTitle">Pridať / Upraviť webinár</h3>
+         <form id="webinarForm">
             <input type="hidden" id="webinarId" name="id" />
             <div style="display:flex; gap:8px; margin-bottom:8px; flex-direction:column;">
                 <input placeholder="Názov" name="title" id="webinarTitle" style="padding:8px;" required />
@@ -565,15 +633,15 @@
                 <button type="button" onclick="closeWebinarModal()" style="padding:8px 12px;">Zrušiť</button>
                 <button id="saveWebinarBtn" type="button" onclick="saveWebinar()" style="background:#9c0b8e;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Uložiť</button>
             </div>
-        </form>
-    </div>
-</div>
+         </form>
+     </div>
+ </div>
 
 <!-- Testimonial modal -->
-<div id="testimonialModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
-    <div style="background:#fff; padding:1rem; border-radius:8px; width:560px; max-width:95%;">
-        <h3 id="testimonialModalTitle">Pridať / Upraviť doktora</h3>
-        <form id="testimonialForm">
+<div id="testimonialModal" class="modal-dialog">
+    <div class="modal-content-box" style="max-width:560px; width:95%;">
+         <h3 id="testimonialModalTitle">Pridať / Upraviť doktora</h3>
+         <form id="testimonialForm">
             <input type="hidden" id="testimonialId" name="id" />
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <input placeholder="Meno" name="name" id="testimonialName" style="padding:8px;" required />
@@ -586,9 +654,9 @@
                 <button type="button" onclick="closeTestimonialModal()" style="padding:8px 12px;">Zrušiť</button>
                 <button id="saveTestimonialBtn" type="button" onclick="saveTestimonial()" style="background:#9c0b8e;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Uložiť</button>
             </div>
-        </form>
-    </div>
-</div>
+         </form>
+     </div>
+ </div>
 
 <div class="container">
     <section class="admin-dashboard">
