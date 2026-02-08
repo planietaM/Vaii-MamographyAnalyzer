@@ -1,102 +1,107 @@
 # Mamography Analyzer
 
-Krátky popis
+Moja webová aplikácia umožňuje rádiológom overiť mamografické snímky a zistiť prítomnosť rakovinových buniek. Motiváciou je kombinácia štúdií a záujmu o medicínsku informatiku a využitie AI pri diagnostike rakoviny prsníka. Výber témy súvisí s mojím zámerom bakalárskej práce zameranej na praktické a aktuálne problémy. Cieľom projektu je preskúmať možnosti využitia Visual Transformerov pri analýze snímok a vytvoriť funkčné riešenie pre medicínsku prax. Aplikácia poskytuje jednoduché rozhranie, kde rádiológ nahrá snímku a dostane vizualizované výsledky s indikáciou rizikových oblastí. Môj model je optimalizovaný pre presné rozpoznávanie nádorových zmien a zároveň je zabezpečená anonymizácia citlivých údajov. Aplikácia má slúžiť ako podporný nástroj pre rádiológov, nie ako ich náhrada. Konkrétne ciele sú: jednoduché nahrávanie snímok, vyhodnotenie modelom, vizualizácia podozrivých oblastí a prehľadné výsledky. Projekt spája teoretické poznatky s praktickým nasadením a môže priniesť prínos pre medicínsku sféru aj ďalší výskum AI diagnostiky.
 
-Tento projekt je jednoduché webové demo pre "Mamography Analyzer" — nástroj na podporu mamografického skríningu s admin rozhraním na správu doktorov (testimonialov) a webinárov.
+## Čo robí Mamography analyzer
 
-Hlavné funkcie
+- Základná administrácia používateľov (doktor, pacient, admin).
+- Správa webinárov (CRUD).
+- Správa testimonialov / doktorov (CRUD, upload fotky).
+- Počas vývoja som ukladal fotky do DB ako base64 (stĺpec `image_data`) — jednoduché pre demo.
 
-- Správa používateľov (doktor, pacient, admin) cez admin dashboard.
-- CRUD webinárov (názov, stručný text, dátum, miesto, telefón) — bez obrázkov.
-- CRUD testimonialov / doktorov (meno, rola, text, nahratie fotky z PC). Fotky sa ukladajú do DB ako `image_data` (data URL).
-- Jednoduchá stránka s úvodom a sekciou "Najbližšie webináre" a karuselom testimonialov.
+## Požiadavky
 
-Rýchle inštrukcie na spustenie (lokálne)
+- PHP 8+ (alebo verzia, ktorú požaduje projekt).
+- Composer.
+- sqlite3 (repo obsahuje `database/database.sqlite` — najjednoduchšia voľba).
 
-Požiadavky
+Ak chceš, môžeš použiť MySQL/Postgres — uprav `.env`.
 
-- PHP 8+ (alebo verzia ktorá používa projekt)
-- Composer
-- sqlite3 (projekt používa sqlite v repozitári ako jednoduché DB) — ak nepoužívate sqlite, upravte `.env`
+## Inštalácia (Windows PowerShell)
 
-Inštalácia závislostí
+1) Prejdi do projektu:
 
-```powershell
-cd C:\Users\marpl\Desktop\Mamooo\mamographyAnalyzer
-composer install
-```
+    ```powershell
+    cd C:\Users\marpl\Desktop\Mamooo\mamographyAnalyzer
+    ```
 
-Vytvorenie env (ak chýba)
+2) Nainštaluj závislosti:
 
-```powershell
-copy .env.example .env
-php artisan key:generate
-```
+    ```powershell
+    composer install
+    ```
 
-DB (SQLite) — ak používate sqlite: skontrolujte `database/database.sqlite` alebo vytvorte nový súbor.
+3) Skopíruj `.env` a vygeneruj kľúč:
 
-Migrácie a seedery
+    ```powershell
+    copy .env.example .env
+    php artisan key:generate
+    ```
 
-Aplikujte migrácie a seedery (v prostredí vývoja):
+4) SQLite: ak chýba, vytvor súbor databázy:
+
+    ```powershell
+    New-Item -Path database\database.sqlite -ItemType File
+    ```
+
+## Migrácie a seed
+
+Spusti migrácie a (voliteľne) seedery:
 
 ```powershell
 php artisan migrate --force
 php artisan db:seed
 ```
 
-Poznámka: počas vývoja som pridal/a niekoľko migrácií:
-- Pridané `image_data` pre `testimonials` (ukladanie base64 data-URI).
-- Odstránené textové pole `image` (cesta) z `testimonials`.
-- Odstránené obrázkové polia z `webinars` (webináre už nemajú obrázky).
-- Nakoniec som odstránil stĺpec `active` z `testimonials` (UI ho už nepoužíva).
-
-Ak potrebujete vrátiť migrácie späť (rollback):
+Ak potrebuješ vrátiť poslednú migráciu:
 
 ```powershell
 php artisan migrate:rollback --step=1
 ```
 
-Spustenie lokálneho vývoja
+## Spustenie lokálne
 
 ```powershell
 php artisan serve
-# otvoríte http://127.0.0.1:8000 alebo adresu, ktorú servíruje artisan
+# otvor: http://127.0.0.1:8000
 ```
 
-Admin dashboard
+## Admin
 
-- Prihláste sa ako admin (ak seed vytvorí admin používateľa) alebo vytvorte používateľa s rolou `admin`.
-- Otvorte `/dashboard` — tam je sekcia `Testimonialy / Doktori` a `Webináre`.
-- Testimonial modal umožňuje nahratie fotky (input `type=file`). Obrázok sa uloží do DB ako base64 `image_data` a hneď sa zobrazí v tabuľke.
+- Po seedovaní by mal existovať admin účet (ak to seeder robí). Ak nie, vytvor ho cez tinker alebo manuálne v DB.
+- Skontroluj routy v `routes/web.php` (dashboard môže byť na `/dashboard` alebo inej ceste).
 
-Poznámky k tomu, ako som upravil správanie testimonialov:
-
-- UI už neprijíma textovú cestu k obrázku (pole `image` bolo odstránené). Nahrávajte obrázky cez file input.
-- Ak chcete nahrávať obrázky namiesto ukladania do DB (odporúča sa pri veľkých súboroch), môžem presunúť ukladanie do `storage/app/public` a ukladať len cestu v DB.
-
-Frontend / AJAX
-
-- Admin šablóna obsahuje JS, ktorý používa `axios` na CRUD volania pre `webinars` a `testimonials`.
-- Na admin stránke som pridal server-side fallback: testimonialy sa vykreslia priamo z Blade (ak sú v premennej `$testimonials`), takže aj keď AJAX zlyhá, uvidíte údaje z DB.
-
-Testovanie
-
-- Rýchla kontrola v tinker (príklady):
+Príklad vytvorenia admina cez tinker:
 
 ```powershell
-php artisan tinker --execute "print_r(\DB::table('testimonials')->first());"
+php artisan tinker --execute "\App\Models\User::create(['name'=>'Admin','email'=>'admin@example.com','password'=>bcrypt('heslo'), 'role'=>'admin']);"
 ```
 
-Často kladené otázky / tipy
+## Obrázky
 
-- Prečo sú obrázky uložené ako base64 v DB? — Je to rýchle riešenie počas vývoja. Pre produkciu odporúčam uložiť súbory na disk a v DB ukladať len cestu.
-- Ako pridať nový webinár? — Admin dashboard → Webináre → Pridať webinár.
-- Ako zmeniť zobrazovanie testimonialov na homepage? — `resources/views/home.blade.php` zobrazuje testimonialy podľa `Testimonial::orderBy('position')`.
+- Demo spracováva obrázky ako base64 v DB (`image_data`).
+- Pre serióznejšie nasadenie odporúčam ukladať súbory na disk (`storage/app/public`) a v DB ukladať len cestu.
 
-Kontakt
+## Riešenie bežných problémov
 
-Ak chceš ďalšie zlepšenia (preview obrázku pri nahrávaní, presun ukladania obrázkov na disk, vylepšenie štýlov), napíš, čo preferuješ a implementujem to.
+- Nevidíš zmeny v `.env`? Skús:
 
----
+    ```powershell
+    php artisan config:clear
+    php artisan cache:clear
+    ```
 
-Malé zhrnutie: upravil/a som admin UI tak, aby testimonialy boli čerpané z DB a aby sa nahrávala fotka cez file input; taktiež som urobil/a migrácie na odstránenie starých polí (image, active) a pridal/a pole `image_data` pre bezpečné zobrazovanie uploadov.
+- Problémy s právami (storage, bootstrap/cache) — na Linuxe rieš `chown`/`chmod`.
+- Pri zmene DB skontroluj `DB_CONNECTION` v `.env`.
+
+## Čo plánujem ďalej (možné vylepšenia)
+
+- Presun uploadu obrázkov z DB na disk.
+- Admin seeder, ak ešte chýba.
+- Client-side náhľad pri nahrávaní fotky.
+
+## Kontakt
+
+Ak chceš, aby som niečo upravil alebo pomohol s nasadením — otvor issue alebo napíš (planieta4@stud.uniza.sk).
+
+
